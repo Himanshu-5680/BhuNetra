@@ -1,0 +1,18 @@
+# Heat thresholds follow IMD's published heat-wave criteria.
+# Source: IMD "Morning Heat Bulletin" (https://mausam.imd.gov.in/pdfs/heatcolduser/morning_heat_bulletin.pdf), read 2026-10-08.
+heat:
+  region_min_tmax_c: {plains: 40, coastal: 37, hilly: 30}   # heat wave only considered at/above this
+  departure_heat_wave_c: 4.5        # 4.5 to 6.4 above normal = heat wave
+  departure_severe_c: 6.4           # above this = severe heat wave
+  absolute_heat_wave_c: 45          # plains only
+  absolute_severe_c: 47             # plains only
+  # v1 SIMPLIFICATIONS (documented in docs/targets.md):
+  #  - every district treated as "plains" until a coastal/hilly classification is added
+  #  - model-grid Tmax is used, not station Tmax; IMD needs >=2 stations for >=2 days
+  #  - "normal" = our own climatology from the years we download (IMD uses 1991-2020)
+  normal_window_days: 7             # +/- days around the date used to build the normal
+rain:
+  status: draft_needs_citation      # IMD rainfall classes to be read before use
+aqi:
+  scheme: us_aqi                    # Open-Meteo provides us_aqi (CAMS model)
+seed: 42

@@ -1,0 +1,51 @@
+# Every data source in one place. "key_required" tells the code what to skip without a key.
+# status: verified = endpoint + terms read from official docs on 2026-10-07
+sources:
+  open_meteo_forecast:
+    name: Open-Meteo Forecast API
+    url: https://api.open-meteo.com/v1/forecast
+    license: CC BY 4.0 (free for non-commercial use)
+    key_required: false
+    status: verified
+  open_meteo_archive:
+    name: Open-Meteo Historical Weather API (ERA5-based)
+    url: https://archive-api.open-meteo.com/v1/archive
+    license: CC BY 4.0 (free for non-commercial use)
+    key_required: false
+    status: verified_license_endpoint_confirm_in_phase2
+  open_meteo_air_quality:
+    name: Open-Meteo Air Quality API (CAMS model, NOT sensors)
+    url: https://air-quality-api.open-meteo.com/v1/air-quality
+    license: CC BY 4.0; must credit CAMS ENSEMBLE data provider + Open-Meteo
+    key_required: false
+    status: verified
+  openaq:
+    name: OpenAQ v3 (ground stations)
+    url: https://api.openaq.org/v3
+    license: per-provider (read from API /licenses)
+    key_required: true   # free key, header X-API-Key
+    status: verified
+  nasa_firms:
+    name: NASA FIRMS active fires
+    url: https://firms.modaps.eosdis.nasa.gov/api/area/
+    license: NASA open data policy (confirm wording in phase 2)
+    key_required: true   # free MAP_KEY
+    status: verified_key_needed
+  usgs_earthquakes:
+    name: USGS Earthquake Catalog (FDSN)
+    url: https://earthquake.usgs.gov/fdsnws/event/1/query
+    license: US Gov public domain (confirm wording in phase 2)
+    key_required: false
+    status: verified
+  geoboundaries_ind:
+    name: geoBoundaries India ADM1/ADM2
+    url: https://data.humdata.org/m/dataset/geoboundaries-admin-boundaries-for-india
+    license: ODbL (as listed on HDX)
+    key_required: false
+    status: verified
+  worldpop_ind:
+    name: WorldPop India population (2020)
+    url: https://hub.worldpop.org/geodata/summary?id=36808
+    license: CC BY 4.0
+    key_required: false
+    status: verified

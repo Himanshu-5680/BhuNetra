@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bhunetra"
+version = "0.0.1"
+description = "Open, explainable multi-hazard risk platform for India (real public data only)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+# Core deps only. ML / UI / API extras are added phase by phase.
+dependencies = [
+  "requests>=2.31",
+  "pyyaml>=6.0",
+  "pandas>=2.1",
+  "pyarrow>=14",
+  "duckdb>=0.10",
+  "pandera>=0.18",
+  "shapely>=2.0",
+]
+
+[project.optional-dependencies]
+app = ["streamlit>=1.50", "pydeck>=0.9", "scikit-learn>=1.4", "lightgbm>=4.0", "shapely>=2.0"]
+dev = ["pytest>=8", "responses>=0.25", "ruff>=0.4", "black>=24"]
+ml = ["lightgbm>=4.3", "scikit-learn>=1.4", "shap>=0.45", "matplotlib>=3.8", "tabulate>=0.9"]
+
+[project.scripts]
+bhunetra = "bhunetra.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100

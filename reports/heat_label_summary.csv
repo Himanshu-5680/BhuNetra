@@ -1,0 +1,5 @@
+split,heat_h1_sum,heat_h1_count,heat_h2_sum,heat_h2_count,heat_h3_sum,heat_h3_count
+purged,0.0,360,0.0,360,0.0,360
+test,615.0,21780,615.0,21780,615.0,21780
+train,403.0,65220,403.0,65220,403.0,65220
+valid,253.0,21720,253.0,21720,253.0,21720

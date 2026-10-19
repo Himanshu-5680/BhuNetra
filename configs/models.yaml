@@ -1,0 +1,6 @@
+# Which model the app and API use by default. Chosen by the VALID year (2023) first,
+# then confirmed on test (2024). See docs/decisions.md.
+heat:
+  default_model: logreg          # logreg | lightgbm
+  logreg_features: [tmax, departure, tmax_mean3]
+  refit_on: train_plus_valid     # final model used for predictions after validation

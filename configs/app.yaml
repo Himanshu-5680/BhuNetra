@@ -1,0 +1,9 @@
+app:
+  languages: [en, hi]
+  disclaimer: "Not an official warning system. Follow IMD / NDMA / local authorities."
+forecast_horizons_hours: [24, 48, 72]
+# Display bands for the heat probability. A PRESENTATION choice (documented in docs/decisions.md),
+# NOT IMD alert levels. The logistic model's probabilities were close to calibrated on 2024 data.
+risk_bands:
+  low_below: 0.10
+  high_from: 0.40

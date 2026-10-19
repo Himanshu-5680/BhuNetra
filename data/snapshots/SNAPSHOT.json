@@ -1,0 +1,18 @@
+{
+  "what": "Real Open-Meteo Historical Weather API (ERA5-based) daily values, 60 sampled Indian districts + geoBoundaries district points",
+  "date_range": [
+    "2020-01-01",
+    "2024-12-31"
+  ],
+  "rows": 109620,
+  "fetched_at_utc_range": [
+    "2026-10-09T160835Z",
+    "2026-10-10T174653Z"
+  ],
+  "license": "Weather: CC BY 4.0 via Open-Meteo (non-commercial use; credit Open-Meteo and ERA5/Copernicus). Boundaries: geoBoundaries, ODbL as listed on HDX.",
+  "sha256": {
+    "climate_daily_2020_2024.parquet": "509f43f14badb3a3d6db94a515c5010a127236c44933ac1667b38c61b1d58109",
+    "districts.parquet": "773827431d1610fcd4a098305336618482658dcba2ec12d66744274f35a57c6b"
+  },
+  "note": "OFFLINE SNAPSHOT used by `make demo`. Not live data. Real values, never edited."
+}
