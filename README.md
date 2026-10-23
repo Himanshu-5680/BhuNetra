@@ -186,7 +186,7 @@ transition: transform 160ms ease-out, box-shadow 160ms ease-out;
 
 The core public web application requires **Python 3.11+** and uses the **Python Standard Library only** (zero external dependencies required for the web server).
 
-From the root directory containing `serve.py` and `bhunetra.html`:
+From the repository root (where `serve.py` and `bhunetra.html` live):
 
 ```bash
 python serve.py
@@ -199,6 +199,10 @@ Then open **[http://127.0.0.1:8765/](http://127.0.0.1:8765/)** in your browser.
 1. **Concurrent Upstream Fetch:** Calls only the documented Open-Meteo and USGS endpoints — fetching weather, air quality, and earthquakes together.
 2. **Transparent 10-Minute Memory Cache:** Keeps a successful response in memory for `10 minutes`[cite: 3]. If you search the same city again within that window, the badge honestly stamps `cached` rather than pretending the network was instant.
 3. **Serverless Fallback:** If you open `bhunetra.html` directly in your browser without running `serve.py`, the client-side code queries those exact same four public endpoints directly from your browser tab.
+
+### Deploy on Render
+
+The repository includes `render.yaml`. On Render, create a **Blueprint** (or a Python **Web Service**) from this repo. It runs `python serve.py`, reads Render's `PORT`, binds `0.0.0.0`, and checks `/healthz`. No packages are installed for the web server.
 
 ---
 

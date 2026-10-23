@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: bhunetra
+    runtime: python
+    plan: free
+    branch: main
+    # serve.py uses only the Python standard library, so nothing is installed.
+    buildCommand: python --version
+    startCommand: python serve.py
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8

@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>
+try {
+  var savedTheme = localStorage.getItem("bhunetra-theme");
+  if (savedTheme !== "light" && savedTheme !== "dark") savedTheme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+} catch (e) { document.documentElement.setAttribute("data-theme", "light"); }
+</script>
+<title>BhuNetra – Hazards near you, in real data</title>
+<meta name="description" content="Search an Indian city and read live heat, rain, air quality and recent earthquakes from named open sources. Free. Not an official warning.">
+<meta property="og:title" content="BhuNetra – India hazards, in real data">
+<meta property="og:description" content="Search your city. Heat, rain, air and recent quakes, each with its source. Not an official warning.">
+<meta property="og:url" content="https://bhunetra-ai.tech">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="theme-color" content="#F4F0E6">
+<link rel="canonical" href="https://bhunetra-ai.tech/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Noto+Sans+Devanagari:wght@500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#d6e9fe;--paper:#ffffff;--ink:#111111;--yellow:#facc00;--red:#ff4d50;
+  --main:#5294ff;--heat:#ff4d50;--rain:#5294ff;--air:#05e17a;--quake:#facc00;
+  --hero:#111111;--hero-ink:#f6f6f4;--ghost:#8f8f8f;--muted:#2c2c2c;
+  --line:#111111;--shadow:#111111;
+  --brown:var(--hero);--cream:var(--hero-ink);--gold:var(--yellow);--coral:var(--red);
+  --serif:"Archivo Black","Noto Sans Devanagari","Nirmala UI",sans-serif;
+  --mono:"Space Grotesk","Noto Sans Devanagari","Nirmala UI",sans-serif;
+  color-scheme:light;
+}
+html[data-theme="dark"]{
+  --bg:#10141c;--paper:#171c27;--ink:#f4f7fb;--yellow:#facc00;--red:#ff4d50;
+  --main:#5294ff;--heat:#ff4d50;--rain:#5294ff;--air:#05e17a;--quake:#facc00;
+  --hero:#000000;--hero-ink:#f6f6f4;--ghost:#a3a3a3;--muted:#c5d0de;
+  --line:#f4f7fb;--shadow:#5294ff;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 15px/1.5 var(--mono)}
+::selection{background:var(--yellow);color:#111}
+a{color:inherit}
+img{max-width:100%}
+.w{max-width:1080px;margin:0 auto;padding:0 24px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--yellow);color:#111;padding:8px 12px;font-weight:700;z-index:80}
+.skip:focus{left:8px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+/* Official-style notice. This page is not a government site. */
+.sticky{position:sticky;top:0;z-index:30}
+.notice{background:var(--yellow);color:#111;border-bottom:3px solid #111;font-weight:700;font-size:12px}
+.notice .w{display:flex;justify-content:space-between;gap:16px;padding-top:8px;padding-bottom:8px;flex-wrap:wrap}
+.notice a{text-decoration:underline;text-underline-offset:2px}
+.top{background:var(--brown);border-bottom:3px solid var(--line)}
+.top .w{display:flex;justify-content:space-between;align-items:center;min-height:58px;gap:16px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.logo{display:inline-flex;align-items:center;gap:10px;font:400 22px/1 var(--serif);color:var(--cream);letter-spacing:.02em;text-decoration:none}
+.logo i,.eyebrow i{width:9px;height:9px;border-radius:50%;background:var(--gold);display:inline-block;flex:none}
+.top nav{display:flex;align-items:center;flex-wrap:wrap;gap:4px 18px}
+.top nav a{color:var(--cream);font-size:12px;font-weight:700;text-decoration:none;letter-spacing:.04em}
+.top nav a:hover,.top nav a.on{color:var(--gold)}
+.top nav a.on{text-decoration:underline;text-underline-offset:6px}
+#lang,#theme{background:transparent;color:var(--cream);border:3px solid var(--cream);padding:4px 8px;font:700 12px var(--mono);cursor:pointer}
+#lang:hover,#theme:hover{background:var(--yellow);color:#111;border-color:#111}
+
+.hero{background:var(--brown);color:var(--cream);padding:48px 0 36px;position:relative}
+.eyebrow{display:flex;align-items:center;gap:10px;margin:0 0 18px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:lowercase;color:var(--cream)}
+h1{font:400 clamp(48px,8vw,96px)/.9 var(--serif);letter-spacing:-.03em;margin:0 0 28px}
+h1 .ln{display:block}
+h1 .gold{color:var(--gold);font-style:normal}
+h1 .per{color:var(--cream)}
+.mis{position:relative;display:inline-block}
+.mis .face{position:relative;z-index:1}
+.mis .gh{position:absolute;left:.045em;top:.04em;width:100%;color:#9a9a9a;z-index:0;pointer-events:none;user-select:none;clip-path:none}
+.docid{display:grid;gap:4px;margin:0 0 28px;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--ghost)}
+.docid b{color:var(--cream);font-weight:700}
+
+.search{display:flex;max-width:560px;border:3px solid #111;background:#FFFDF8;box-shadow:6px 6px 0 var(--yellow);transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s cubic-bezier(.2,.8,.2,1)}
+.search:has(button:hover),.search:has(button:focus-visible){transform:translate(3px,3px);box-shadow:3px 3px 0 var(--yellow)}
+.search:has(button:active){transform:translate(6px,6px);box-shadow:0 0 0 var(--yellow)}
+.search input{flex:1;border:0;padding:14px 14px;font:500 15px var(--mono);min-width:0;background:transparent;color:#111}
+.search button{border:0;border-left:3px solid #111;padding:0 22px;background:var(--yellow);color:#111;font:700 13px var(--mono);cursor:pointer}
+.search button:hover{background:var(--cream)}
+.hint{font-size:12px;margin:14px 0 0;color:var(--ghost);max-width:62ch}
+.hint button{background:none;border:0;color:var(--cream);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0 4px}
+.honest,.key{max-width:62ch;margin:18px 0 0;color:var(--ghost);font-size:12px;font-weight:700}
+.mapw{position:relative;width:470px;max-width:100%;margin:28px 0 0}
+.mapw canvas{display:block;width:100%;height:auto;background:transparent}
+.mapcap{margin:8px 0 0;max-width:62ch;color:var(--ghost);font-size:11px}
+.tip{display:none;position:absolute;pointer-events:none;background:#fff;color:#111;padding:6px 10px;font-size:13px;font-weight:700;white-space:nowrap;border:2px solid #111;border-radius:8px;box-shadow:4px 4px 0 #111;z-index:2}
+.tip b{color:#111;font-weight:700}
+
+#res{padding:36px 0 12px;scroll-margin-top:108px}
+#res h2{font:400 clamp(40px,6vw,68px)/.95 var(--serif);margin:0 0 6px;letter-spacing:-.03em;overflow-wrap:break-word}
+#sub{margin:0;font-weight:700}
+.alts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.alts span{font-weight:700;align-self:center}
+.alts button{background:var(--paper);border:3px solid var(--line);padding:4px 8px;font:700 12px var(--mono);box-shadow:4px 4px 0 var(--shadow);cursor:pointer;white-space:normal;text-align:left;max-width:100%}
+.alts button:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--shadow)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:20px}
+.card{background:var(--paper);border:3px solid var(--line);padding:16px;box-shadow:6px 6px 0 var(--shadow);transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s cubic-bezier(.2,.8,.2,1)}
+.card:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--shadow)}
+.card small{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.04em}
+.card b{display:block;font:400 44px/1 var(--serif);margin:8px 0 6px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.card p{margin:0;font-size:13px}
+.src-line{display:block;margin-top:10px;font-size:11px;color:var(--muted)}
+.card[data-tone="hot"] b,.card[data-tone="bad"] b{color:var(--coral)}
+.card[data-tone="warm"] b{color:#6B4E00}
+html[data-theme="dark"] .card[data-tone="warm"] b{color:var(--yellow)}
+.tag{display:inline-block;border:3px solid #111;padding:0 6px;font-size:11px;font-weight:700;background:var(--yellow);color:#111}
+.tag.soon{background:transparent;color:var(--ink)}
+.idx{display:inline-grid;place-items:center;min-width:28px;height:20px;padding:0 4px;background:var(--yellow);color:#111;border:3px solid #111;font-size:11px}
+
+.days{margin-top:16px;border:3px solid var(--line);background:var(--paper);box-shadow:6px 6px 0 var(--shadow)}
+.days table{width:100%;border-collapse:collapse}
+.days caption{text-align:left;padding:12px 12px 0;font-size:12px;font-weight:700}
+.days th,.days td{text-align:left;padding:10px 12px;border-bottom:3px solid var(--line);font-size:13px;vertical-align:middle}
+.days tr:last-child td{border-bottom:0}
+.track{height:12px;border:3px solid var(--line);background:var(--bg)}
+.track i{display:block;height:100%;background:var(--gold);width:0}
+.btn{display:inline-block;background:var(--yellow);color:#111;border:3px solid #111;padding:9px 16px;font:700 13px var(--mono);cursor:pointer;text-decoration:none;box-shadow:6px 6px 0 var(--shadow);transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s cubic-bezier(.2,.8,.2,1)}
+.btn:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--shadow)}
+.btn:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--ink)}
+
+.stats{border-bottom:3px solid var(--line);background:var(--bg)}
+.stats .w{display:grid;grid-template-columns:repeat(4,1fr);padding:0}
+.stats .w>div{padding:18px 16px;border-right:3px solid var(--line)}
+.stats .w>div:last-child{border-right:0}
+.stats b{display:block;font:400 40px/1 var(--serif);letter-spacing:-.03em}
+.stats span{font-size:12px;font-weight:700}
+
+section{padding:64px 0}
+h2.s{font:400 clamp(32px,5vw,52px)/.95 var(--serif);margin:6px 0 22px;letter-spacing:-.03em}
+h2.s em{font-style:normal;color:var(--coral)}
+.lab{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+.band{background:var(--brown);color:var(--cream)}
+.band .lab{color:var(--ghost)}
+.band h2.s em{color:var(--gold)}
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:28px}
+.three h3{font:600 28px/1.1 var(--serif);margin:8px 0}
+.n{display:inline-block;background:var(--yellow);color:#111;border:3px solid #111;font-weight:700;padding:0 7px}
+.src{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.src div,.src a.tile{display:block;border:3px solid var(--line);padding:14px;background:var(--paper);font-weight:700;box-shadow:6px 6px 0 var(--shadow);text-decoration:none;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s cubic-bezier(.2,.8,.2,1)}
+.src div:hover,.src a.tile:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--shadow)}
+.src span{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:4px}
+details{border-bottom:3px solid var(--line);padding:14px 0}
+summary{cursor:pointer;font-weight:700}
+details p{margin:8px 0 0;max-width:70ch}
+.steps{margin:0;padding-left:20px;max-width:75ch}
+.steps li{margin-bottom:10px}
+footer{background:var(--brown);color:var(--cream);padding:28px 0;font-size:12px;border-top:3px solid var(--line)}
+footer a{color:var(--gold)}
+.ph{background:var(--brown);color:var(--cream);padding:42px 0 32px}
+.ph h1{font-size:clamp(42px,6vw,72px);margin:8px 0 10px}
+.ph p{max-width:62ch;color:var(--ghost);margin:0}
+.grid.wide{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.noscript{margin:0;padding:10px 24px;background:var(--coral);color:#fff;font-weight:700}
+
+.cubes{display:flex;gap:8px;align-items:flex-end;height:44px}
+.cubes i{width:16px;height:16px;border:3px solid var(--line);animation:hop .9s ease-in-out infinite}
+.cubes i:nth-child(1){background:var(--gold)}
+.cubes i:nth-child(2){background:var(--cream);animation-delay:.15s}
+.cubes i:nth-child(3){background:var(--coral);animation-delay:.3s}
+@keyframes hop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-18px)}}
+#boot{position:fixed;inset:0;background:var(--brown);display:grid;place-items:center;z-index:70;transition:opacity .35s}
+#boot.off{opacity:0;pointer-events:none}
+#trail{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:100}
+#load{position:fixed;inset:0;z-index:80;background:#111;color:#F4F0E6;display:grid;place-items:center;padding:24px}
+#load[hidden]{display:none}
+.loadbox{width:min(480px,100%);border:3px solid #FFE500;background:#111;box-shadow:10px 10px 0 #FFE500;padding:22px}
+.loadbox .lab{color:#C8C2B4}
+.loadbox h2{font:400 clamp(36px,8vw,60px)/.95 var(--serif);margin:8px 0 16px;color:#F4F0E6}
+.loadbox ol{list-style:none;margin:0;padding:0}
+.loadbox li{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;border:3px solid #F4F0E6;padding:8px 10px;margin-top:8px;font-weight:700}
+.loadbox li i{font-style:normal}
+.loadbox li.run,.loadbox li.ok{background:#FFE500;color:#111;border-color:#111}
+.loadbox li.bad{background:#C40000;color:#fff;border-color:#fff}
+.loadbox li.wait{opacity:.45}
+.stamps{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+.stamp{border:3px solid #111;background:var(--yellow);color:#111;padding:6px 8px;font-size:12px;font-weight:700;box-shadow:4px 4px 0 var(--shadow)}
+.stamp.bad{background:var(--red);color:#fff;border-color:#111}
+.proof{margin-top:16px;border:3px solid var(--line);background:var(--paper);box-shadow:6px 6px 0 var(--shadow);padding:14px 14px 8px}
+.proof h3{font:400 28px/1 var(--serif);margin:0 0 8px}
+.proof p{margin:0 0 10px}
+.coords{font-weight:700;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.proof table{width:100%;border-collapse:collapse;font-size:12px}
+.proof th,.proof td{text-align:left;padding:7px 4px;border-bottom:2px solid var(--line);vertical-align:top}
+.proof a{font-weight:700;text-decoration:underline;text-underline-offset:2px}
+
+@media (min-width:800px){h1 .ln{white-space:nowrap}}
+@media (max-width:560px){
+  .stats .w{grid-template-columns:1fr 1fr}
+  .stats .w>div:nth-child(2){border-right:0}
+  .stats .w>div:nth-child(-n+2){border-bottom:3px solid var(--line)}
+  .search{flex-direction:column;box-shadow:6px 6px 0 var(--yellow)}
+  .search button{border-left:0;border-top:3px solid #111;padding:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important;animation:none!important}
+  #trail{display:none}
+}
+@media (hover:hover) and (pointer:fine){
+  html.cursor-on,html.cursor-on *{cursor:none!important}
+}
+
+/* Press-down, from the neo-brutal button: 4px shift, shadow gone, slight delay. */
+.top{background:var(--paper);color:var(--ink);border-bottom:2px solid var(--line)}
+.logo{color:var(--ink)}
+.logo i{background:var(--main);border-radius:2px}
+.top nav a{color:var(--ink);display:inline-block;border:2px solid var(--line);background:var(--paper);border-radius:8px;padding:4px 10px;box-shadow:4px 4px 0 var(--shadow);text-decoration:none}
+.top nav a.on{background:var(--main);color:#111;border-color:#111}
+#lang,#theme{color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:8px;box-shadow:4px 4px 0 var(--shadow)}
+.card,.btn,.stamp,.alts button,.src a.tile,.top nav a,#lang,#theme,.search,.hint button{
+  border-radius:8px;
+  transition:transform 160ms cubic-bezier(.33,1,.68,1),box-shadow 160ms cubic-bezier(.33,1,.68,1),background-color 160ms ease,color 160ms ease;
+}
+.card,.stamp,.alts button,.src a.tile,.days,.proof{overflow:hidden}
+#tracks .card{container-type:inline-size}
+#tracks .card b,#p-hazards .card b{font-family:var(--mono);font-weight:700;font-size:clamp(20px,10cqi,30px);letter-spacing:-.04em;line-height:1.1;display:block;max-width:100%}
+.card:hover,.btn:hover,.stamp:hover,.alts button:hover,.src a.tile:hover,.top nav a:hover,#lang:hover,#theme:hover,.hint button:hover{
+  transform:translate(4px,4px);box-shadow:0 0 0 transparent;
+}
+.search:has(button:hover),.search:has(button:focus-visible){transform:translate(4px,4px);box-shadow:0 0 0 transparent}
+.search:has(button:active){transform:translate(4px,4px);box-shadow:0 0 0 transparent}
+.card:hover,.card:hover b,.card:hover p,.card:hover small,.card:hover .src-line{color:#111}
+.card:hover{background:var(--main)}
+.card[data-kind="heat"]:hover,#tracks .card:nth-child(1):hover,#p-hazards .card:nth-child(1):hover{background:var(--heat)}
+.card[data-kind="rain"]:hover,#tracks .card:nth-child(2):hover,#p-hazards .card:nth-child(2):hover{background:var(--rain)}
+.card[data-kind="air"]:hover,#tracks .card:nth-child(3):hover,#p-hazards .card:nth-child(3):hover{background:var(--air)}
+.card[data-kind="quake"]:hover,#tracks .card:nth-child(4):hover,#p-hazards .card:nth-child(4):hover{background:var(--quake)}
+.card[data-kind="now"]:hover{background:var(--main)}
+.card[data-kind="advice"]:hover,#tracks .card:nth-child(5):hover,#p-hazards .card:nth-child(5):hover{background:var(--yellow)}
+.btn,.search button,.stamp{background:var(--main);color:#111;border-color:#111}
+.stamp{box-shadow:4px 4px 0 #111}
+.stamp:hover,.btn:hover,.search button:hover,.top nav a:hover,#lang:hover,#theme:hover,.alts button:hover{background:var(--yellow);color:#111}
+.stamp.bad{background:var(--red);color:#111}
+.stamp.bad:hover{background:var(--yellow)}
+.search{border:2px solid #111;box-shadow:4px 4px 0 var(--main);background:#fff;overflow:hidden}
+h1 .gold{color:var(--main)}
+.search button{border-left:2px solid #111}
+.notice{background:var(--yellow);color:#111;border-bottom:2px solid #111}
+.src a.tile:hover,.src a.tile:hover span{color:#111}
+.src a.tile:nth-child(1):hover{background:var(--heat)}
+.src a.tile:nth-child(2):hover{background:var(--air)}
+.src a.tile:nth-child(3):hover{background:var(--main)}
+.src a.tile:nth-child(4):hover{background:var(--quake)}
+.logo .mark{width:72px;height:40px;display:block;flex:none}
+.logo .netra{color:#5294ff}
+</style>
+</head>
+<body>
+<div id="boot" aria-label="Loading"><div class="cubes"><i></i><i></i><i></i></div></div>
+<canvas id="trail" aria-hidden="true"></canvas>
+<div id="load" hidden>
+  <div class="loadbox" role="status" aria-live="assertive">
+    <p class="lab" data-t="loadLab">FETCHING LIVE SOURCES</p>
+    <h2 id="load-name"></h2>
+    <ol>
+      <li id="st-place" class="wait"><i>01</i><span data-t="loadPlace">Place</span><b></b></li>
+      <li id="st-weather" class="wait"><i>02</i><span data-t="loadWeather">Weather</span><b></b></li>
+      <li id="st-air" class="wait"><i>03</i><span data-t="loadAir">Air</span><b></b></li>
+      <li id="st-quake" class="wait"><i>04</i><span data-t="loadQuake">Quakes</span><b></b></li>
+    </ol>
+  </div>
+</div>
+<a class="skip" href="#main" data-t="skip">Skip to content</a>
+<div class="sticky">
+  <div class="notice"><div class="w"><span data-t="notice">Information only. Not an IMD, CPCB or NDMA warning. In an emergency call 112.</span></div></div>
+  <header class="top"><div class="w">
+    <a class="logo" href="#/home"><svg class="mark" viewBox="0 0 64 36" aria-hidden="true"><path d="M2 18C12 5 52 5 62 18C52 31 12 31 2 18Z" fill="none" stroke="#5294ff" stroke-width="3"/><path d="M32 9.2A8.8 8.8 0 0 0 32 26.8V9.2Z" fill="#5294ff"/><path d="M32 9.2A8.8 8.8 0 0 1 32 26.8V9.2Z" fill="#facc00"/><circle cx="32" cy="18" r="3.2" fill="#111827"/><circle cx="30.8" cy="16.8" r="1.1" fill="#fff"/><path d="M48 6.5l4.2-3.4 2.6 2.2-1.6 4.2-4 .8z" fill="#facc00"/><path d="M12 25l-2.4 5.2 4.6-.6z" fill="#5294ff"/></svg><span>BHU<span class="netra">NETRA</span></span></a>
+    <nav>
+      <a href="#/home" data-t="navHome">Home</a>
+      <a href="#/hazards" data-t="navHaz">Hazards</a>
+      <a href="#/data" data-t="navData">Data</a>
+      <a href="#/about" data-t="navAbout">About</a>
+      <button type="button" id="theme">Dark</button>
+      <button type="button" id="lang">हिंदी</button>
+    </nav>
+  </div></header>
+</div>
+<noscript><p class="noscript">JavaScript is off, so live numbers cannot load. The writing on this page is still readable.</p></noscript>
+
+<main id="main" tabindex="-1">
+<div class="pg" id="p-home">
+<div class="hero"><div class="w">
+  <p class="docid"><span data-t="doc1">PUBLIC RESEARCH PAGE</span><b data-t="doc2">NOT A GOVERNMENT SITE</b><span>19 OCT 2026</span></p>
+  <p class="eyebrow"><i aria-hidden="true"></i><span data-t="eyebrow">open data · india · free · not an official alert</span></p>
+  <h1>
+    <span class="ln"><span data-t="h1a">India's </span><span class="mis"><span class="face" data-t="h1b">hazards</span><span class="gh" aria-hidden="true">hazards</span></span></span>
+    <span class="ln"><span data-t="h1c">Check </span><span class="gold" data-t="h1d">yours</span><span class="per">.</span></span>
+  </h1>
+  <form class="search" id="f" role="search">
+    <input id="q" data-t-ph="ph" placeholder="Type a city, e.g. Delhi" aria-label="City name" data-t-aria="cityAria" autocomplete="off">
+    <button type="submit" data-t="go">Check</button>
+  </form>
+  <div class="hint"><span data-t="try">Try:</span>
+    <button type="button" data-c="Delhi">Delhi</button>
+    <button type="button" data-c="Mumbai">Mumbai</button>
+    <button type="button" data-c="Chennai">Chennai</button>
+    <button type="button" data-c="Guwahati">Guwahati</button>
+    <span data-t="orMap">or choose a red square on the locator.</span>
+  </div>
+  <p class="honest" data-t="honest">Every number is fetched when you search, from the source named on its card. This page does not replace those numbers with its own score, and it does not claim a perfect accuracy rate.</p>
+  <p class="key" data-t="palette">Blue is a button. Yellow is caution. Red is heat. Green is clearer air. None of these colours is an official alert.</p>
+  <div class="mapw">
+    <canvas id="map" width="470" height="486" data-t-aria="mapAria" aria-label="Schematic locator of India. Choose a red square to check that city. This is not an official map."></canvas>
+    <div id="tip" class="tip"></div>
+  </div>
+  <p class="mapcap" data-t="mapcap">Schematic locator only. The squares are approximate city positions. This drawing is not a survey map, does not show borders, and is not a statement about any boundary.</p>
+</div></div>
+
+<div id="res" hidden aria-live="polite"><div class="w">
+  <h2 id="place"></h2>
+  <p id="sub"></p>
+  <div class="alts" id="alts"></div>
+  <div id="proof"></div>
+  <div class="grid" id="cards"></div>
+  <div id="days"></div>
+</div></div>
+
+<div class="stats"><div class="w">
+  <div><b>5</b><span data-t="st1">hazards named</span></div>
+  <div><b>4</b><span data-t="st2">fetched live on search</span></div>
+  <div><b>0</b><span data-t="st3">accounts required</span></div>
+  <div><b>0–100</b><span data-t="st4">risk index — not shown</span></div>
+</div></div>
+
+<section id="tracks"><div class="w">
+  <div class="lab" data-t="labTrack">WHAT THIS PAGE READS</div>
+  <h2 class="s"><span data-t="tracksA">Five hazards. </span><em data-t="tracksB">One page.</em></h2>
+  <div class="grid">
+    <div class="card"><small><span class="idx">01</span><span data-t="kHeat">HEAT</span></small><b data-t="bHeat">Temperature</b><p data-t="pHeat">Highest model temperature across the next three daily values, plus each day.</p><span class="tag" data-t="live">live</span></div>
+    <div class="card"><small><span class="idx">02</span><span data-t="kRain">RAIN</span></small><b data-t="bRain">Rainfall</b><p data-t="pRain">Sum of daily precipitation over those same three days. Not a flood warning.</p><span class="tag" data-t="live">live</span></div>
+    <div class="card"><small><span class="idx">03</span><span data-t="kAir">AIR</span></small><b data-t="bAir">US AQI</b><p data-t="pAir">Current US AQI and PM2.5 from a coarse air model. Not the Indian CPCB scale.</p><span class="tag" data-t="live">live</span></div>
+    <div class="card"><small><span class="idx">04</span><span data-t="kQuake">QUAKES</span></small><b data-t="bQuake">Recent quakes</b><p data-t="pQuake">Magnitude 3 and above within 300 km, last 30 days. A catalogue, not a forecast.</p><span class="tag" data-t="live">live</span></div>
+    <div class="card"><small><span class="idx">05</span><span data-t="kFire">FIRE</span></small><b data-t="bFire">Fires</b><p data-t="pFire">Not on this page. NASA FIRMS needs a free key, and a keyless page must not invent detections.</p><span class="tag soon" data-t="soon">not loaded</span></div>
+  </div>
+</div></section>
+
+<section class="band" id="how"><div class="w">
+  <div class="lab" data-t="labHow">HOW A SEARCH WORKS</div>
+  <h2 class="s"><span data-t="howA">Search, read, </span><em data-t="howB">check the source.</em></h2>
+  <div class="three">
+    <div><span class="n">1</span><h3 data-t="s1">Type a city</h3><span data-t="s1b">Any place in India. No account and no API key.</span></div>
+    <div><span class="n">2</span><h3 data-t="s2">The page asks the source</h3><span data-t="s2b">Open-Meteo for weather and air. USGS for recent quakes. One failure does not fill the others with zeros.</span></div>
+    <div><span class="n">3</span><h3 data-t="s3">You get the number and the name</h3><span data-t="s3b">Each card says where the number came from, and what it is not.</span></div>
+  </div>
+</div></section>
+</div>
+
+<div class="pg" id="p-data" hidden>
+<div class="ph"><div class="w">
+  <div class="eyebrow"><i aria-hidden="true"></i><span data-t="eyebrow">open data · india · free · not an official alert</span></div>
+  <h1><span data-t="dataH">Where every number </span><em class="gold" data-t="dataHe">comes from.</em></h1>
+  <p data-t="dataP">No guessed endpoints and no filled-in gaps. If a source does not answer, the card says so.</p>
+</div></div>
+<section><div class="w">
+  <div class="lab" data-t="labSrc">SOURCES CALLED BY THIS PAGE</div>
+  <h2 class="s"><span data-t="srcA">Named sources. </span><em data-t="srcB">No stand-ins.</em></h2>
+  <div class="src">
+    <a class="tile" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo Forecast<span data-t="srcWeather">Weather. Non-commercial use. Model grid, not a street sensor. Variables: temperature_2m, temperature_2m_max, temperature_2m_min, precipitation_sum.</span></a>
+    <a class="tile" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo Air Quality<span data-t="srcAir">Current us_aqi and pm2_5. CAMS model, about 45 km over India. US AQI, not CPCB.</span></a>
+    <a class="tile" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo Geocoding<span data-t="srcGeo">Place name to a point in India (countryCode IN). The first exact name match, otherwise the first hit.</span></a>
+    <a class="tile" href="https://earthquake.usgs.gov/" target="_blank" rel="noopener noreferrer">USGS earthquake catalogue<span data-t="srcQuake">FDSN event query. Magnitude 3+, 300 km, 30 days. Records of past quakes. Quakes are not predicted here.</span></a>
+  </div>
+</div></section>
+<section id="faq" style="padding-top:0"><div class="w">
+  <div class="lab" data-t="labFaq">COMMON QUESTIONS</div>
+  <h2 class="s"><span data-t="faqA">Limits, </span><em data-t="faqB">in writing.</em></h2>
+  <details><summary data-t="q1">Are these official warnings?</summary><p data-t="a1">No. Follow IMD, CPCB, NDMA and your local authority. Call 112 in an emergency. The plain labels on a card (warm, hot, unhealthy) are readings of the source number. They are not IMD heatwave declarations and not CPCB categories.</p></details>
+  <details><summary data-t="q2">Why is there no 0–100 risk index?</summary><p data-t="a2">A single index would hide which hazard moved, and it would need a population layer joined to the point. This page does not load population, so it does not invent a score. You see the source numbers instead.</p></details>
+  <details><summary data-t="q3">Why can the air number differ from the Indian AQI?</summary><p data-t="a3">The card is US AQI from Open-Meteo's air model. India's CPCB scale uses different bands. The model is coarse, about 45 km over India, so a street can differ from the cell.</p></details>
+  <details><summary data-t="q4">Where is the machine-learning forecast?</summary><p data-t="a4">Not on this page. A separate heat-only research model (a simple logistic regression) was compared with baselines on 60 of about 735 districts, using past days rather than a weather forecast. On days a heat spell starts, that model caught 19% one day ahead, 11% two days ahead, and 25% three days ahead. Those figures are onset recall on the 2024 test, not an overall accuracy. Because onset detection is weak, this page shows the source forecast instead of that model's probability.</p></details>
+  <details><summary data-t="q5">What is not loaded, and why?</summary><p data-t="a5">Fires (NASA FIRMS) and station air (OpenAQ) need a free key. This page is keyless, so those layers are absent rather than filled with example dots. Earthquake occurrence is not forecast.</p></details>
+</div></section>
+<section style="padding-top:0"><div class="w">
+  <div class="lab" data-t="labMethod">METHOD</div>
+  <h2 class="s"><span data-t="mA">What the search </span><em data-t="mB">actually does.</em></h2>
+  <ol class="steps">
+    <li data-t="step1">Place: your text is sent to the Open-Meteo geocoding service with countryCode IN. Results are kept for 10 minutes in this browser tab only.</li>
+    <li data-t="step2">Weather: the forecast endpoint, forecast_days=3, timezone=auto. The page shows the current model temperature, each day's high, low and precipitation, the highest high, and the precipitation sum. A missing day is reported. It is not replaced with zero.</li>
+    <li data-t="step3">Air: the air-quality endpoint, current us_aqi and pm2_5. If either is missing, that line says unavailable.</li>
+    <li data-t="step4">Quakes: the USGS FDSN event endpoint, format=geojson, minmagnitude=3, maxradiuskm=300, starttime=30 days ago, ordered by magnitude, limit 20.</li>
+    <li data-t="step5">The locator drawing is computed in the browser from a rough outline. It is not loaded from a boundary file. City squares are a fixed list of approximate coordinates.</li>
+  </ol>
+</div></section>
+</div>
+
+<div class="pg" id="p-hazards" hidden>
+<div class="ph"><div class="w">
+  <div class="eyebrow"><i aria-hidden="true"></i><span data-t="eyebrow">open data · india · free · not an official alert</span></div>
+  <h1><span data-t="hazH">Know the reading. </span><em class="gold" data-t="hazHe">Know what to do.</em></h1>
+  <p data-t="hazP">What this page can show for each hazard, and ordinary precautions. Official instructions override this page.</p>
+</div></div>
+<section><div class="w"><div class="grid wide">
+  <div class="card"><small><span class="idx">01</span><span data-t="kHeat">HEAT</span></small><b data-t="bHeat">Temperature</b><p data-t="hz1">What we show: the model's highest temperature over three daily values, and each day. Not an IMD heatwave declaration.</p><p data-t="hz1b">Stay safe: drink water often, avoid hard outdoor work from noon to 4 pm, and check on older neighbours.</p></div>
+  <div class="card"><small><span class="idx">02</span><span data-t="kRain">RAIN</span></small><b data-t="bRain">Rainfall</b><p data-t="hz2">What we show: total model precipitation over those three days. Not a flood warning.</p><p data-t="hz2b">Stay safe: do not walk or drive through flood water, move valuables up, and keep a charged phone and a torch.</p></div>
+  <div class="card"><small><span class="idx">03</span><span data-t="kAir">AIR</span></small><b data-t="bAir">US AQI</b><p data-t="hz3">What we show: current US AQI and PM2.5 from a coarse model. Not a CPCB station on your street.</p><p data-t="hz3b">Stay safe: on bad days keep windows closed, limit outdoor exercise, and use an N95 mask outside.</p></div>
+  <div class="card"><small><span class="idx">04</span><span data-t="kQuake">QUAKES</span></small><b data-t="bQuake">Recent quakes</b><p data-t="hz4">What we show: recent quakes of M3 or more within 300 km. We do not predict quakes.</p><p data-t="hz4b">Stay safe: Drop, Cover and Hold On. Stay away from windows. After shaking stops, check for gas leaks.</p></div>
+  <div class="card"><small><span class="idx">05</span><span data-t="kFire">FIRE</span></small><b data-t="bFire">Fires</b><p data-t="hz5">What we show: nothing yet. A keyless page does not draw fake fire detections.</p><p data-t="hz5b">Stay safe: follow local authorities, keep away from smoke, and move early if told to evacuate.</p></div>
+</div>
+<p style="margin-top:28px"><b data-t="call112">In an emergency, call 112.</b></p>
+<a class="btn" href="#/home" data-t="checkCity">Check your city</a>
+</div></section>
+</div>
+
+<div class="pg" id="p-about" hidden>
+<div class="ph"><div class="w">
+  <div class="eyebrow"><i aria-hidden="true"></i><span data-t="eyebrow">open data · india · free · not an official alert</span></div>
+  <h1><span data-t="abH">Hazard data that </span><em class="gold" data-t="abHe">anyone can read.</em></h1>
+  <p data-t="abP">BhuNetra means "earth's eye". It is a free, open-source research page that puts public hazard data in plain language. It is not a government service.</p>
+</div></div>
+<section><div class="w">
+  <div class="lab" data-t="labPrin">PRINCIPLES</div>
+  <h2 class="s"><span data-t="prA">Real data. </span><em data-t="prB">Plain words.</em></h2>
+  <div class="grid wide">
+    <div class="card"><b data-t="c1">Real data only</b><p data-t="c1b">Every live number comes from a source named on the Data page. A failed request stays blank.</p></div>
+    <div class="card"><b data-t="c2">Honest limits</b><p data-t="c2b">The heat research model is weak on the first day of a spell, so its probability is not shown as if it were a warning.</p></div>
+    <div class="card"><b data-t="c3">Open to all</b><p data-t="c3b">No account, no API key, and no sign-up. Hindi and English carry the same facts.</p></div>
+  </div>
+  <h2 class="s" style="margin-top:48px"><span data-t="rdA">Still </span><em data-t="rdB">outside this page.</em></h2>
+  <ol class="steps">
+    <li data-t="rd1">Fire detections and ground air stations. Both need a key, so they are not pretended here.</li>
+    <li data-t="rd2">A population-weighted risk index. Not shown until a real population layer is joined in the open.</li>
+    <li data-t="rd3">The heat model's own 24–72 hour probabilities. Held back because onset recall is 11–25%, as written on the Data page.</li>
+  </ol>
+  <p data-t="rdNote">These are gaps, not hidden features.</p>
+  <h2 class="s" style="margin-top:40px"><span data-t="invA">Get </span><em data-t="invB">in touch.</em></h2>
+  <p data-t="invP">Found a wrong number or a broken source? Email hello@bhunetra-ai.tech. There is no public code host linked here, because a placeholder URL would be a dead end.</p>
+</div></section>
+</div>
+</main>
+
+<footer><div class="w"><span data-t="foot">BhuNetra is an open-source research page. Information only, not an official alert.</span> <a href="mailto:hello@bhunetra-ai.tech">hello@bhunetra-ai.tech</a></div></footer>
+
+<script>
+const COPY = {
+en: {
+  skip:"Skip to content", notice:"Information only. Not an IMD, CPCB or NDMA warning. In an emergency call 112.",
+  navHome:"Home", navHaz:"Hazards", navData:"Data", navAbout:"About",
+  doc1:"PUBLIC RESEARCH PAGE", doc2:"NOT A GOVERNMENT SITE",
+  eyebrow:"open data · india · free · not an official alert",
+  h1a:"India's ", h1b:"hazards", h1c:"Check ", h1d:"yours",
+  ph:"Type a city, e.g. Delhi", cityAria:"City name", go:"Check",
+  try:"Try:", orMap:"or choose a red square on the locator.",
+  honest:"Every number is fetched when you search, from the source named on its card. This page does not replace those numbers with its own score, and it does not claim a perfect accuracy rate.",
+  mapAria:"Schematic locator of India. Choose a red square to check that city. This is not an official map.",
+  mapcap:"Schematic locator only. The squares are approximate city positions. This drawing is not a survey map, does not show borders, and is not a statement about any boundary.",
+  st1:"hazards named", st2:"fetched live on search", st3:"accounts required", st4:"risk index — not shown",
+  labTrack:"WHAT THIS PAGE READS", tracksA:"Five hazards. ", tracksB:"One page.",
+  kHeat:"HEAT", bHeat:"Temperature", pHeat:"Highest model temperature across the next three daily values, plus each day.",
+  kRain:"RAIN", bRain:"Rainfall", pRain:"Sum of daily precipitation over those same three days. Not a flood warning.",
+  kAir:"AIR", bAir:"US AQI", pAir:"Current US AQI and PM2.5 from a coarse air model. Not the Indian CPCB scale.",
+  kQuake:"QUAKES", bQuake:"Recent quakes", pQuake:"Magnitude 3 and above within 300 km, last 30 days. A catalogue, not a forecast.",
+  kFire:"FIRE", bFire:"Fires", pFire:"Not on this page. NASA FIRMS needs a free key, and a keyless page must not invent detections.",
+  live:"live", soon:"not loaded",
+  labHow:"HOW A SEARCH WORKS", howA:"Search, read, ", howB:"check the source.",
+  s1:"Type a city", s1b:"Any place in India. No account and no API key.",
+  s2:"The page asks the source", s2b:"Open-Meteo for weather and air. USGS for recent quakes. One failure does not fill the others with zeros.",
+  s3:"You get the number and the name", s3b:"Each card says where the number came from, and what it is not.",
+  dataH:"Where every number ", dataHe:"comes from.",
+  dataP:"No guessed endpoints and no filled-in gaps. If a source does not answer, the card says so.",
+  labSrc:"SOURCES CALLED BY THIS PAGE", srcA:"Named sources. ", srcB:"No stand-ins.",
+  srcWeather:"Weather. Non-commercial use. Model grid, not a street sensor. Variables: temperature_2m, temperature_2m_max, temperature_2m_min, precipitation_sum.",
+  srcAir:"Current us_aqi and pm2_5. CAMS model, about 45 km over India. US AQI, not CPCB.",
+  srcGeo:"Place name to a point in India (countryCode IN). The first exact name match, otherwise the first hit.",
+  srcQuake:"FDSN event query. Magnitude 3+, 300 km, 30 days. Records of past quakes. Quakes are not predicted here.",
+  labFaq:"COMMON QUESTIONS", faqA:"Limits, ", faqB:"in writing.",
+  q1:"Are these official warnings?",
+  a1:"No. Follow IMD, CPCB, NDMA and your local authority. Call 112 in an emergency. The plain labels on a card (warm, hot, unhealthy) are readings of the source number. They are not IMD heatwave declarations and not CPCB categories.",
+  q2:"Why is there no 0–100 risk index?",
+  a2:"A single index would hide which hazard moved, and it would need a population layer joined to the point. This page does not load population, so it does not invent a score. You see the source numbers instead.",
+  q3:"Why can the air number differ from the Indian AQI?",
+  a3:"The card is US AQI from Open-Meteo's air model. India's CPCB scale uses different bands. The model is coarse, about 45 km over India, so a street can differ from the cell.",
+  q4:"Where is the machine-learning forecast?",
+  a4:"Not on this page. A separate heat-only research model (a simple logistic regression) was compared with baselines on 60 of about 735 districts, using past days rather than a weather forecast. On days a heat spell starts, that model caught 19% one day ahead, 11% two days ahead, and 25% three days ahead. Those figures are onset recall on the 2024 test, not an overall accuracy. Because onset detection is weak, this page shows the source forecast instead of that model's probability.",
+  q5:"What is not loaded, and why?",
+  a5:"Fires (NASA FIRMS) and station air (OpenAQ) need a free key. This page is keyless, so those layers are absent rather than filled with example dots. Earthquake occurrence is not forecast.",
+  labMethod:"METHOD", mA:"What the search ", mB:"actually does.",
+  step1:"Place: your text is sent to the Open-Meteo geocoding service with countryCode IN. Results are kept for 10 minutes in this browser tab only.",
+  step2:"Weather: the forecast endpoint, forecast_days=3, timezone=auto. The page shows the current model temperature, each day's high, low and precipitation, the highest high, and the precipitation sum. A missing day is reported. It is not replaced with zero.",
+  step3:"Air: the air-quality endpoint, current us_aqi and pm2_5. If either is missing, that line says unavailable.",
+  step4:"Quakes: the USGS FDSN event endpoint, format=geojson, minmagnitude=3, maxradiuskm=300, starttime=30 days ago, ordered by magnitude, limit 20.",
+  step5:"The locator drawing is computed in the browser from a rough outline. It is not loaded from a boundary file. City squares are a fixed list of approximate coordinates.",
+  hazH:"Know the reading. ", hazHe:"Know what to do.",
+  hazP:"What this page can show for each hazard, and ordinary precautions. Official instructions override this page.",
+  hz1:"What we show: the model's highest temperature over three daily values, and each day. Not an IMD heatwave declaration.",
+  hz1b:"Stay safe: drink water often, avoid hard outdoor work from noon to 4 pm, and check on older neighbours.",
+  hz2:"What we show: total model precipitation over those three days. Not a flood warning.",
+  hz2b:"Stay safe: do not walk or drive through flood water, move valuables up, and keep a charged phone and a torch.",
+  hz3:"What we show: current US AQI and PM2.5 from a coarse model. Not a CPCB station on your street.",
+  hz3b:"Stay safe: on bad days keep windows closed, limit outdoor exercise, and use an N95 mask outside.",
+  hz4:"What we show: recent quakes of M3 or more within 300 km. We do not predict quakes.",
+  hz4b:"Stay safe: Drop, Cover and Hold On. Stay away from windows. After shaking stops, check for gas leaks.",
+  hz5:"What we show: nothing yet. A keyless page does not draw fake fire detections.",
+  hz5b:"Stay safe: follow local authorities, keep away from smoke, and move early if told to evacuate.",
+  call112:"In an emergency, call 112.", checkCity:"Check your city",
+  abH:"Hazard data that ", abHe:"anyone can read.",
+  abP:"BhuNetra means \"earth's eye\". It is a free, open-source research page that puts public hazard data in plain language. It is not a government service.",
+  labPrin:"PRINCIPLES", prA:"Real data. ", prB:"Plain words.",
+  c1:"Real data only", c1b:"Every live number comes from a source named on the Data page. A failed request stays blank.",
+  c2:"Honest limits", c2b:"The heat research model is weak on the first day of a spell, so its probability is not shown as if it were a warning.",
+  c3:"Open to all", c3b:"No account, no API key, and no sign-up. Hindi and English carry the same facts.",
+  rdA:"Still ", rdB:"outside this page.",
+  rd1:"Fire detections and ground air stations. Both need a key, so they are not pretended here.",
+  rd2:"A population-weighted risk index. Not shown until a real population layer is joined in the open.",
+  rd3:"The heat model's own 24–72 hour probabilities. Held back because onset recall is 11–25%, as written on the Data page.",
+  rdNote:"These are gaps, not hidden features.",
+  invA:"Get ", invB:"in touch.",
+  invP:"Found a wrong number or a broken source? Email hello@bhunetra-ai.tech. There is no public code host linked here, because a placeholder URL would be a dead end.",
+  foot:"BhuNetra is an open-source research page. Information only, not an official alert.",
+  themeDark:"Dark", themeLight:"Light",
+  palette:"Blue is a button. Yellow is caution. Red is heat. Green is clearer air. None of these colours is an official alert.",
+  loadLab:"FETCHING LIVE SOURCES", loadPlace:"Place", loadWeather:"Weather", loadAir:"Air", loadQuake:"Quakes",
+  proofTitle:"Check this yourself",
+  proofLead:"Each row is a request this page made. Open the JSON. The number on the card should be in that file. A failed row stays empty.",
+  stampLive:"live", stampCached:"cached", stampFail:"failed", openJson:"Open JSON",
+  colSource:"Source", colTime:"Time", colState:"State",
+  loading:"Fetching source data…",
+  noPlace:"No place found", noPlaceSub:"Check the spelling, or try a larger city nearby.",
+  fail:"Could not load data", failSub:"Check your connection and try again.",
+  liveSub:"Fetched when you searched. Times below use your clock.",
+  also:"Not this place?",
+  now:"NOW · MODEL", heat:"HEAT · 3-DAY HIGH", rain:"RAIN · 3-DAY SUM", air:"AIR · US AQI", quake:"QUAKES · 30 DAYS, 300 KM",
+  unavail:"Unavailable",
+  srcNow:"Open-Meteo forecast · current temperature_2m · model grid, not a street sensor · non-commercial",
+  srcHeat:"Open-Meteo forecast · daily temperature_2m_max · not an IMD heatwave declaration",
+  srcRain:"Open-Meteo forecast · daily precipitation_sum · not a flood warning",
+  srcAirCard:"Open-Meteo air quality · us_aqi and pm2_5 · US scale, not CPCB · coarse model",
+  srcQuakeCard:"USGS catalogue · M3+ · 300 km · last 30 days · not a prediction",
+  noAir:"No US AQI in the response for this point.",
+  noQuakeSvc:"USGS did not respond.",
+  noWeather:"The weather service did not respond.",
+  heatComfort:"Comfortable range for this forecast high.",
+  heatWarm:"Warm. A plain reading of the forecast high, not an IMD declaration.",
+  heatHot:"Hot. Drink water often. Not an IMD heatwave declaration.",
+  heatVery:"Very hot. Avoid midday sun. Not an IMD heatwave declaration.",
+  dry:"Mostly dry in this three-day sum.", some:"Some rain in this three-day sum.", heavy:"Heavy rain possible in this sum. Check IMD. Not a flood warning.",
+  rainGap:"At least one day had no precipitation value, so no total is shown.",
+  heatGap:"At least one day had no temperature, so no high is shown.",
+  aqiGood:"Good", aqiMod:"Moderate", aqiSens:"Unhealthy for sensitive groups", aqiUn:"Unhealthy", aqiVun:"Very unhealthy", aqiHaz:"Hazardous",
+  aqiNote:"US AQI. Not the Indian CPCB scale.",
+  noQuakes:"No quakes of M3 or more in this window. This is not a safety certificate.",
+  quakeIs:"Largest in the window. A past event, not a forecast.",
+  advice:"WHAT TO DO",
+  tipHeat:"Avoid hard outdoor work from noon to 4 pm and drink water often.",
+  tipRain:"Heavy rain is in this three-day sum. Avoid low-lying roads and check IMD.",
+  tipAir:"Air is in an unhealthy US AQI band. An N95 outdoors, and less outdoor exercise.",
+  tipOk:"Nothing in these source numbers crosses the page's plain thresholds. Official alerts can still say otherwise.",
+  share:"Copy link to this city", copied:"Copied", shareFail:"Clipboard blocked. Copy this link:",
+  daysCap:"Three days from the same Open-Meteo response. The bar compares that day's high with the hottest of the three. It is not a risk score.",
+  thDay:"Day", thHigh:"High", thLow:"Low", thRain:"Rain",
+  missing:"missing",
+  modelNow:"Model now",
+  pm:"PM2.5"
+},
+hi: {
+  skip:"सीधे सामग्री पर जाएँ", notice:"केवल जानकारी। यह IMD, CPCB या NDMA की चेतावनी नहीं है। आपात स्थिति में 112 डायल करें।",
+  navHome:"घर", navHaz:"खतरे", navData:"डेटा", navAbout:"परिचय",
+  doc1:"सार्वजनिक शोध पृष्ठ", doc2:"यह सरकारी वेबसाइट नहीं है",
+  eyebrow:"खुला डेटा · भारत · मुफ़्त · आधिकारिक चेतावनी नहीं",
+  h1a:"भारत के ", h1b:"खतरे", h1c:"अपना ", h1d:"देखें",
+  ph:"शहर लिखें, जैसे दिल्ली", cityAria:"शहर का नाम", go:"देखें",
+  try:"कोशिश करें:", orMap:"या लोकेटर पर लाल वर्ग चुनें।",
+  honest:"हर अंक खोजते समय उसी स्रोत से आता है जिसका नाम कार्ड पर है। यह पृष्ठ उन अंकों की जगह अपना स्कोर नहीं रखता, और पूर्ण सटीकता का दावा नहीं करता।",
+  mapAria:"भारत का सांकेतिक लोकेटर। शहर जाँचने के लिए लाल वर्ग चुनें। यह आधिकारिक नक्शा नहीं है।",
+  mapcap:"केवल सांकेतिक लोकेटर। वर्ग शहरों की अनुमानित जगह हैं। यह सर्वे नक्शा नहीं है, सीमाएँ नहीं दिखाता, और किसी सीमा पर बयान नहीं है।",
+  st1:"खतरों के नाम", st2:"खोज पर लाइव", st3:"खाता ज़रूरी नहीं", st4:"जोखिम सूचकांक — नहीं दिखाया",
+  labTrack:"यह पृष्ठ क्या पढ़ता है", tracksA:"पाँच खतरे। ", tracksB:"एक पृष्ठ।",
+  kHeat:"गर्मी", bHeat:"तापमान", pHeat:"अगले तीन दैनिक मानों में सबसे अधिक मॉडल तापमान, और हर दिन।",
+  kRain:"बारिश", bRain:"वर्षा", pRain:"उन्हीं तीन दिनों की वर्षा का योग। बाढ़ की चेतावनी नहीं।",
+  kAir:"हवा", bAir:"यूएस AQI", pAir:"मोटे वायु मॉडल से वर्तमान यूएस AQI और PM2.5। भारतीय CPCB पैमाना नहीं।",
+  kQuake:"भूकंप", bQuake:"हाल के भूकंप", pQuake:"पिछले 30 दिन, 300 किमी के अंदर, तीव्रता 3 या अधिक। सूची है, पूर्वानुमान नहीं।",
+  kFire:"आग", bFire:"आग", pFire:"इस पृष्ठ पर नहीं। NASA FIRMS के लिए मुफ़्त कुंजी चाहिए। बिना कुंजी के काल्पनिक बिंदु नहीं बनाए जाते।",
+  live:"लाइव", soon:"लोड नहीं",
+  labHow:"खोज कैसे चलती है", howA:"खोजें, पढ़ें, ", howB:"स्रोत देखें।",
+  s1:"शहर लिखें", s1b:"भारत की कोई भी जगह। न खाता, न API कुंजी।",
+  s2:"पृष्ठ स्रोत से पूछता है", s2b:"मौसम और हवा Open-Meteo से। हाल के भूकंप USGS से। एक स्रोत गिरे तो बाकी में शून्य नहीं भरा जाता।",
+  s3:"अंक और उसका नाम", s3b:"हर कार्ड बताता है कि अंक कहाँ से आया, और वह क्या नहीं है।",
+  dataH:"हर अंक ", dataHe:"कहाँ से आया।",
+  dataP:"न अनुमानित पते, न खाली जगह भरी जाती है। स्रोत न बोले तो कार्ड वही कहता है।",
+  labSrc:"इस पृष्ठ के स्रोत", srcA:"स्रोत के नाम। ", srcB:"कोई विकल्प नहीं।",
+  srcWeather:"मौसम। गैर-व्यावसायिक उपयोग। मॉडल ग्रिड, सड़क का सेंसर नहीं। चर: temperature_2m, temperature_2m_max, temperature_2m_min, precipitation_sum।",
+  srcAir:"वर्तमान us_aqi और pm2_5। CAMS मॉडल, भारत पर लगभग 45 किमी। यूएस AQI, CPCB नहीं।",
+  srcGeo:"भारत में जगह का नाम से बिंदु (countryCode IN)। पहले ठीक नाम, नहीं तो पहला परिणाम।",
+  srcQuake:"FDSN इवेंट क्वेरी। तीव्रता 3+, 300 किमी, 30 दिन। बीते भूकंपों का रिकॉर्ड। यहाँ भविष्यवाणी नहीं होती।",
+  labFaq:"आम सवाल", faqA:"सीमाएँ, ", faqB:"लिखकर।",
+  q1:"क्या ये आधिकारिक चेतावनियाँ हैं?",
+  a1:"नहीं। IMD, CPCB, NDMA और स्थानीय प्रशासन का निर्देश मानें। आपात स्थिति में 112। कार्ड के साधारण शब्द (गर्म, बहुत गर्म, अस्वस्थ) स्रोत के अंक की पढ़त हैं। IMD की हीटवेव घोषणा नहीं, CPCB की श्रेणी नहीं।",
+  q2:"0–100 जोखिम सूचकांक क्यों नहीं?",
+  a2:"एक सूचकांक छिपा देता कि कौन सा खतरा बढ़ा। उसके लिए जनसंख्या की परत जोड़नी होती। यह पृष्ठ जनसंख्या नहीं लाता, इसलिए स्कोर गढ़ता नहीं। आपको स्रोत के अंक मिलते हैं।",
+  q3:"हवा का अंक भारतीय AQI से अलग क्यों हो सकता है?",
+  a3:"कार्ड Open-Meteo के वायु मॉडल का यूएस AQI है। CPCB के बैंड अलग हैं। मॉडल मोटा है, भारत पर लगभग 45 किमी, इसलिए गली और सेल अलग हो सकते हैं।",
+  q4:"मशीन-लर्निंग पूर्वानुमान कहाँ है?",
+  a4:"इस पृष्ठ पर नहीं। अलग गर्मी-मॉडल (सरल लॉजिस्टिक रिग्रेशन) करीब 735 में से 60 ज़िलों पर, बीते दिनों के डेटा से, बेसलाइन से तुलना कर जाँचा गया। गर्मी का दौर शुरू होने वाले दिनों में उसने एक दिन आगे 19%, दो दिन आगे 11%, तीन दिन आगे 25% मामले पकड़े। ये 2024 जाँच की ऑन्सेट रिकॉल हैं, कुल सटीकता नहीं। शुरुआत पकड़ने में कमज़ोर होने से यह पृष्ठ उस मॉडल की संभावना की जगह स्रोत का पूर्वानुमान दिखाता है।",
+  q5:"क्या लोड नहीं है, और क्यों?",
+  a5:"आग (NASA FIRMS) और स्टेशन की हवा (OpenAQ) के लिए मुफ़्त कुंजी चाहिए। यह पृष्ठ बिना कुंजी का है, इसलिए उदाहरण के बिंदु नहीं बनाए जाते। भूकंप की भविष्यवाणी नहीं होती।",
+  labMethod:"तरीका", mA:"खोज ", mB:"असल में क्या करती है।",
+  step1:"जगह: आपका पाठ Open-Meteo जियोकोडिंग को countryCode IN के साथ जाता है। नतीजे 10 मिनट तक केवल इसी ब्राउज़र टैब में रहते हैं।",
+  step2:"मौसम: पूर्वानुमान एंडपॉइंट, forecast_days=3, timezone=auto। वर्तमान मॉडल तापमान, हर दिन का उच्च, निम्न और वर्षा, सबसे ऊँचा उच्च, और वर्षा का योग। छूटा दिन बताया जाता है। उसकी जगह शून्य नहीं रखा जाता।",
+  step3:"हवा: वायु-गुणवत्ता एंडपॉइंट, वर्तमान us_aqi और pm2_5। कोई मान न हो तो वह पंक्ति 'उपलब्ध नहीं' कहती है।",
+  step4:"भूकंप: USGS FDSN इवेंट, format=geojson, minmagnitude=3, maxradiuskm=300, पिछले 30 दिन, तीव्रता के क्रम में, सीमा 20।",
+  step5:"लोकेटर ब्राउज़र में एक मोटे खाके से बनता है। सीमा-फ़ाइल से नहीं आता। शहरों के वर्ग अनुमानित निर्देशांकों की स्थिर सूची हैं।",
+  hazH:"पढ़त जानें। ", hazHe:"क्या करें, जानें।",
+  hazP:"हर खतरे के लिए यह पृष्ठ क्या दिखा सकता है, और साधारण सावधानियाँ। आधिकारिक निर्देश इस पृष्ठ से ऊपर हैं।",
+  hz1:"हम क्या दिखाते हैं: तीन दैनिक मानों में मॉडल का सबसे अधिक तापमान, और हर दिन। IMD की हीटवेव घोषणा नहीं।",
+  hz1b:"सुरक्षा: पानी पीते रहें, दोपहर 12 से शाम 4 बजे तक कड़ी धूप में काम टालें, और बुजुर्ग पड़ोसियों का हाल पूछें।",
+  hz2:"हम क्या दिखाते हैं: उन तीन दिनों की कुल मॉडल वर्षा। बाढ़ की चेतावनी नहीं।",
+  hz2b:"सुरक्षा: बाढ़ के पानी में न चलें न गाड़ी चलाएँ, कीमती सामान ऊपर रखें, और फ़ोन व टॉर्च चार्ज रखें।",
+  hz3:"हम क्या दिखाते हैं: मोटे मॉडल से वर्तमान यूएस AQI और PM2.5। आपकी गली का CPCB स्टेशन नहीं।",
+  hz3b:"सुरक्षा: खराब दिन पर खिड़कियाँ बंद रखें, बाहर व्यायाम कम करें, और बाहर N95 मास्क पहनें।",
+  hz4:"हम क्या दिखाते हैं: 300 किमी के अंदर तीव्रता 3 या अधिक के हाल के भूकंप। हम भूकंप की भविष्यवाणी नहीं करते।",
+  hz4b:"सुरक्षा: झुकें, ढकें, और पकड़ें। खिड़कियों से दूर रहें। झटके रुकने पर गैस रिसाव देखें।",
+  hz5:"हम क्या दिखाते हैं: अभी कुछ नहीं। बिना कुंजी के काल्पनिक आग के बिंदु नहीं बनाए जाते।",
+  hz5b:"सुरक्षा: स्थानीय प्रशासन मानें, धुएँ से दूर रहें, और निकालने को कहा जाए तो जल्दी निकलें।",
+  call112:"आपात स्थिति में 112 डायल करें।", checkCity:"अपना शहर देखें",
+  abH:"खतरे का डेटा ", abHe:"जिसे कोई पढ़ सके।",
+  abP:"भूनेत्र का अर्थ है 'धरती की आँख'। यह मुफ़्त, ओपन-सोर्स शोध पृष्ठ सार्वजनिक खतरे के डेटा को सीधी भाषा में रखता है। यह सरकारी सेवा नहीं है।",
+  labPrin:"सिद्धांत", prA:"असली डेटा। ", prB:"सीधे शब्द।",
+  c1:"केवल असली डेटा", c1b:"हर लाइव अंक डेटा पृष्ठ पर लिखे स्रोत से आता है। असफल अनुरोध खाली रहता है।",
+  c2:"ईमानदार सीमाएँ", c2b:"गर्मी का शोध मॉडल दौर के पहले दिन कमज़ोर है, इसलिए उसकी संभावना चेतावनी की तरह नहीं दिखाई जाती।",
+  c3:"सबके लिए खुला", c3b:"न खाता, न API कुंजी, न साइन-अप। हिन्दी और अंग्रेज़ी में वही तथ्य।",
+  rdA:"अभी ", rdB:"इस पृष्ठ से बाहर।",
+  rd1:"आग की पहचान और ज़मीनी वायु स्टेशन। दोनों को कुंजी चाहिए, इसलिए यहाँ दिखावा नहीं।",
+  rd2:"जनसंख्या से तौला जोखिम सूचकांक। असली जनसंख्या परत खुले में जुड़ने तक नहीं।",
+  rd3:"गर्मी मॉडल की अपनी 24–72 घंटे की संभावनाएँ। ऑन्सेट रिकॉल 11–25% होने से रोकी गई हैं, जैसा डेटा पृष्ठ पर है।",
+  rdNote:"ये कमियाँ हैं, छिपी सुविधाएँ नहीं।",
+  invA:"संपर्क ", invB:"करें।",
+  invP:"कोई अंक गलत हो या स्रोत टूटा हो तो hello@bhunetra-ai.tech पर लिखें। यहाँ कोई सार्वजनिक कोड-होस्ट नहीं जोड़ा गया, क्योंकि काल्पनिक पता बंद गली होता।",
+  foot:"भूनेत्र एक ओपन-सोर्स शोध पृष्ठ है। केवल जानकारी, आधिकारिक चेतावनी नहीं।",
+  themeDark:"गहरा", themeLight:"हल्का",
+  palette:"नीला बटन है। पीला सावधानी है। लाल गर्मी है। हरा साफ हवा है। इनमें से कोई रंग आधिकारिक चेतावनी नहीं।",
+  loadLab:"स्रोत से लाया जा रहा है", loadPlace:"जगह", loadWeather:"मौसम", loadAir:"हवा", loadQuake:"भूकंप",
+  proofTitle:"खुद जाँचें",
+  proofLead:"हर पंक्ति वही अनुरोध है जो इस पृष्ठ ने किया। JSON खोलें। कार्ड का अंक उसी फ़ाइल में होना चाहिए। असफल पंक्ति खाली रहती है।",
+  stampLive:"लाइव", stampCached:"सहेजा", stampFail:"असफल", openJson:"JSON खोलें",
+  colSource:"स्रोत", colTime:"समय", colState:"स्थिति",
+  loading:"स्रोत से डेटा आ रहा है…",
+  noPlace:"जगह नहीं मिली", noPlaceSub:"वर्तनी जाँचें, या पास का बड़ा शहर लिखें।",
+  fail:"डेटा लोड नहीं हो सका", failSub:"कनेक्शन जाँचें और फिर कोशिश करें।",
+  liveSub:"खोज के समय लाया गया। नीचे का समय आपकी घड़ी का है।",
+  also:"यह जगह नहीं?",
+  now:"अभी · मॉडल", heat:"गर्मी · 3 दिन का उच्च", rain:"बारिश · 3 दिन का योग", air:"हवा · यूएस AQI", quake:"भूकंप · 30 दिन, 300 किमी",
+  unavail:"उपलब्ध नहीं",
+  srcNow:"Open-Meteo पूर्वानुमान · वर्तमान temperature_2m · मॉडल ग्रिड, सड़क का सेंसर नहीं · गैर-व्यावसायिक",
+  srcHeat:"Open-Meteo पूर्वानुमान · दैनिक temperature_2m_max · IMD की हीटवेव घोषणा नहीं",
+  srcRain:"Open-Meteo पूर्वानुमान · दैनिक precipitation_sum · बाढ़ की चेतावनी नहीं",
+  srcAirCard:"Open-Meteo वायु गुणवत्ता · us_aqi और pm2_5 · यूएस पैमाना, CPCB नहीं · मोटा मॉडल",
+  srcQuakeCard:"USGS सूची · M3+ · 300 किमी · पिछले 30 दिन · भविष्यवाणी नहीं",
+  noAir:"इस बिंदु के जवाब में यूएस AQI नहीं था।",
+  noQuakeSvc:"USGS ने जवाब नहीं दिया।",
+  noWeather:"मौसम सेवा ने जवाब नहीं दिया।",
+  heatComfort:"इस पूर्वानुमान उच्च के लिए सहज सीमा।",
+  heatWarm:"गर्म। पूर्वानुमान उच्च की साधारण पढ़त, IMD की घोषणा नहीं।",
+  heatHot:"बहुत गर्म। पानी पीते रहें। IMD की हीटवेव घोषणा नहीं।",
+  heatVery:"अत्यधिक गर्म। दोपहर की धूप टालें। IMD की हीटवेव घोषणा नहीं।",
+  dry:"इस तीन-दिन के योग में अधिकतर सूखा।", some:"इस तीन-दिन के योग में कुछ बारिश।", heavy:"इस योग में भारी बारिश संभव। IMD देखें। बाढ़ की चेतावनी नहीं।",
+  rainGap:"कम से कम एक दिन का वर्षा मान नहीं था, इसलिए योग नहीं दिखाया गया।",
+  heatGap:"कम से कम एक दिन का तापमान नहीं था, इसलिए उच्च नहीं दिखाया गया।",
+  aqiGood:"अच्छा", aqiMod:"मध्यम", aqiSens:"संवेदनशील लोगों के लिए अस्वस्थ", aqiUn:"अस्वस्थ", aqiVun:"बहुत अस्वस्थ", aqiHaz:"खतरनाक",
+  aqiNote:"यूएस AQI। भारतीय CPCB पैमाना नहीं।",
+  noQuakes:"इस अवधि में M3 या अधिक का कोई भूकंप नहीं। यह सुरक्षा प्रमाणपत्र नहीं है।",
+  quakeIs:"इस अवधि का सबसे बड़ा। बीती घटना है, पूर्वानुमान नहीं।",
+  advice:"क्या करें",
+  tipHeat:"दोपहर 12 से शाम 4 बजे तक कड़ा बाहरी काम टालें और पानी पीते रहें।",
+  tipRain:"तीन-दिन के योग में भारी बारिश है। निचली सड़कें टालें और IMD देखें।",
+  tipAir:"हवा अस्वस्थ यूएस AQI बैंड में है। बाहर N95, और कम बाहरी व्यायाम।",
+  tipOk:"इन स्रोत अंकों में पृष्ठ की साधारण सीमाएँ नहीं छुईं। आधिकारिक चेतावनी फिर भी कुछ और कह सकती है।",
+  share:"इस शहर की लिंक कॉपी करें", copied:"कॉपी हो गई", shareFail:"क्लिपबोर्ड रुका। यह लिंक कॉपी करें:",
+  daysCap:"एक ही Open-Meteo जवाब के तीन दिन। पट्टी उस दिन के उच्च की तुलना तीन में सबसे गर्म दिन से करती है। यह जोखिम स्कोर नहीं है।",
+  thDay:"दिन", thHigh:"उच्च", thLow:"निम्न", thRain:"वर्षा",
+  missing:"नहीं है",
+  modelNow:"मॉडल अभी",
+  pm:"PM2.5"
+}
+};
+
+const $ = id => document.getElementById(id);
+let lang = "en";
+try { lang = sessionStorage.getItem("bhunetra-lang") || "en"; } catch (e) {}
+if (!COPY[lang]) lang = "en";
+const T = () => COPY[lang];
+
+function applyLang() {
+  document.documentElement.lang = lang === "hi" ? "hi" : "en";
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const v = T()[el.getAttribute("data-t")];
+    if (v != null) el.textContent = v;
+  });
+  document.querySelectorAll("[data-t-ph]").forEach(el => {
+    const v = T()[el.getAttribute("data-t-ph")];
+    if (v != null) el.placeholder = v;
+  });
+  document.querySelectorAll("[data-t-aria]").forEach(el => {
+    const v = T()[el.getAttribute("data-t-aria")];
+    if (v != null) el.setAttribute("aria-label", v);
+  });
+  document.querySelectorAll(".gh").forEach(el => {
+    const face = el.parentElement && el.parentElement.querySelector(".face");
+    if (face) el.textContent = face.textContent;
+  });
+  fitGhost();
+  $("lang").textContent = lang === "hi" ? "English" : "हिंदी";
+  const themeBtn = $("theme");
+  if (themeBtn) themeBtn.textContent = document.documentElement.getAttribute("data-theme") === "dark" ? T().themeLight : T().themeDark;
+  const titles = lang === "hi"
+    ? {home:"भूनेत्र – आपके पास के खतरे, असली डेटा में", hazards:"खतरे – भूनेत्र", data:"डेटा और तरीका – भूनेत्र", about:"परिचय – भूनेत्र"}
+    : {home:"BhuNetra – Hazards near you, in real data", hazards:"Hazards – BhuNetra", data:"Data and method – BhuNetra", about:"About – BhuNetra"};
+  const page = (location.hash.slice(2) || "home");
+  document.title = titles[PAGES.includes(page) ? page : "home"];
+  try { sessionStorage.setItem("bhunetra-lang", lang); } catch (e) {}
+}
+
+function fitGhost() {
+  document.querySelectorAll(".gh").forEach(el => { el.style.clipPath = "none"; });
+}
+
+const PAGES = ["home","hazards","data","about"];
+function route() {
+  const h = location.hash.slice(2);
+  const p = PAGES.includes(h) ? h : "home";
+  PAGES.forEach(x => { $("p-" + x).hidden = x !== p; });
+  document.querySelectorAll(".top nav a").forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#/" + p));
+  applyLang();
+  window.scrollTo(0, 0);
+}
+
+/* Locator: a rough outline drawn in the browser. Decorative, not a boundary file. */
+const OUT = [[68.2,23.6],[71,24.3],[70.3,27.6],[72.5,29.2],[74.3,31.2],[74.4,34.5],[75.5,36.5],[77.8,35.5],[79,34],[78.8,32],[81,30.2],[80,28.8],[84,27.5],[88,27],[88.5,28],[89,26.7],[92,27.8],[95,29],[97,28],[95.5,26],[94.5,24],[93,22.2],[92,24],[90,25.2],[89,24],[88.8,22],[87,21.5],[85,19.8],[82,16.5],[80.3,15.5],[80.2,13],[79.8,10.3],[78,8.5],[77.3,8],[76.3,9.8],[75,12.5],[74.2,15],[73.2,18],[72.8,20.5],[72.5,21.5],[70,20.8],[69,22.3]];
+const CITIES = [["Delhi",77.2,28.6],["Mumbai",72.8,19.1],["Kolkata",88.4,22.6],["Chennai",80.3,13.1],["Bengaluru",77.6,12.97],["Hyderabad",78.5,17.4],["Ahmedabad",72.6,23],["Jaipur",75.8,26.9],["Lucknow",80.9,26.8],["Guwahati",91.7,26.1],["Patna",85.1,25.6],["Bhopal",77.4,23.3],["Srinagar",74.8,34.1],["Thiruvananthapuram",76.9,8.5]];
+const X0 = 67, X1 = 98, Y0 = 6, Y1 = 38, STEP = 0.6, CSS_W = 470, CSS_H = 486;
+const cv = $("map"), cx = cv.getContext("2d");
+const COLS = Math.round((X1 - X0) / STEP), ROWS = Math.round((Y1 - Y0) / STEP);
+const CW = CSS_W / COLS, CH = CSS_H / ROWS;
+let glow = null, lastPt = null, rafMap = 0;
+const TEMPS = {};
+function inside(x, y) {
+  let r = false;
+  for (let i = 0, j = OUT.length - 1; i < OUT.length; j = i++) {
+    const a = OUT[i], b = OUT[j];
+    if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) r = !r;
+  }
+  return r;
+}
+const dots = [];
+for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
+  const lon = X0 + c * STEP, lat = Y1 - r * STEP;
+  if (inside(lon, lat)) dots.push([c, r]);
+}
+function mix(k) { return "rgb(" + ((106 + 138 * k) | 0) + "," + ((106 + 134 * k) | 0) + "," + ((106 + 124 * k) | 0) + ")"; }
+function fitMap() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = Math.round(CSS_W * dpr);
+  cv.height = Math.round(CSS_H * dpr);
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw(lastPt);
+}
+function draw(pt) {
+  lastPt = pt || null;
+  cx.clearRect(0, 0, CSS_W, CSS_H);
+  dots.forEach(([c, r]) => {
+    const x = c * CW + CW / 2, y = r * CH + CH / 2;
+    const d = glow ? Math.hypot(x - glow[0], y - glow[1]) : 999;
+    const k = Math.max(0, 1 - d / 90);
+    cx.fillStyle = k ? mix(k) : "#6A6A6A";
+    cx.fillRect(c * CW + 1, r * CH + 1, Math.max(1, CW - 2), Math.max(1, CH - 2));
+  });
+  CITIES.forEach(c => {
+    const x = (c[1] - X0) / STEP * CW, y = (Y1 - c[2]) / STEP * CH;
+    cx.fillStyle = "#C40000";
+    cx.fillRect(x - 4, y - 4, 8, 8);
+  });
+  if (pt) {
+    const x = (pt[0] - X0) / STEP * CW, y = (Y1 - pt[1]) / STEP * CH;
+    cx.fillStyle = "#FFE500";
+    cx.strokeStyle = "#141414";
+    cx.lineWidth = 2;
+    cx.fillRect(x - 7, y - 7, 14, 14);
+    cx.strokeRect(x - 7, y - 7, 14, 14);
+  }
+}
+function mapPoint(e) {
+  const b = cv.getBoundingClientRect();
+  return [(e.clientX - b.left) * (CSS_W / b.width), (e.clientY - b.top) * (CSS_H / b.height)];
+}
+function hit(e) {
+  const [mx, my] = mapPoint(e);
+  return CITIES.find(c => Math.abs((c[1] - X0) / STEP * CW - mx) < 10 && Math.abs((Y1 - c[2]) / STEP * CH - my) < 10);
+}
+cv.addEventListener("pointermove", e => {
+  if (e.pointerType && e.pointerType !== "mouse") return;
+  const c = hit(e), t = $("tip");
+  glow = mapPoint(e);
+  if (!rafMap) rafMap = requestAnimationFrame(() => { rafMap = 0; draw(lastPt); });
+  if (c) {
+    const b = cv.getBoundingClientRect();
+    t.textContent = c[0] + " ";
+    const n = document.createElement("b");
+    n.textContent = TEMPS[c[0]] != null ? TEMPS[c[0]] + "°" : "";
+    t.appendChild(n);
+    t.style.left = (e.clientX - b.left + 12) + "px";
+    t.style.top = (e.clientY - b.top - 32) + "px";
+    t.style.display = "block";
+  } else t.style.display = "none";
+});
+cv.addEventListener("pointerleave", () => { glow = null; draw(lastPt); $("tip").style.display = "none"; });
+cv.addEventListener("click", e => { const c = hit(e); if (c) { $("q").value = c[0]; check(c[0]); } });
+
+const get = u => {
+  try {
+    const c = JSON.parse(sessionStorage.getItem("bn:" + u) || "null");
+    if (c && Date.now() - c.t < 6e5) return Promise.resolve(c.d);
+  } catch (e) {}
+  const opts = {};
+  try { opts.signal = AbortSignal.timeout(15000); } catch (e) {}
+  return fetch(u, opts).then(r => {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }).then(d => {
+    try { sessionStorage.setItem("bn:" + u, JSON.stringify({ t: Date.now(), d })); } catch (e) {}
+    return d;
+  });
+};
+
+function num(v) { return typeof v === "number" && isFinite(v) ? v : null; }
+function fmt(v, d) { return v == null ? T().missing : v.toFixed(d); }
+function modelClock(iso) {
+  if (!iso || String(iso).indexOf("T") < 0) return iso || "";
+  const [d, tm] = String(iso).split("T");
+  return dayLabel(d) + ", " + tm.slice(0, 5);
+}
+function otherPlaces(results, picked) {
+  const seen = new Set();
+  const out = [];
+  for (const r of results) {
+    if (r === picked || (picked.id != null && r.id === picked.id)) continue;
+    const key = [r.name, r.admin1, r.admin2].join("|").toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(r);
+    if (out.length === 3) break;
+  }
+  return out;
+}
+function placeLabel(r) {
+  return [r.name, r.admin2, r.admin1].filter(Boolean).join(", ");
+}
+function dayLabel(iso) {
+  const parts = String(iso || "").split("-").map(Number);
+  if (parts.length < 3 || parts.some(n => !n)) return String(iso || "");
+  const dt = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+  return new Intl.DateTimeFormat(lang === "hi" ? "hi-IN" : "en-IN", { weekday:"short", day:"numeric", month: lang === "hi" ? "long" : "short", timeZone:"UTC" }).format(dt);
+}
+function clock(d) {
+  return new Intl.DateTimeFormat(lang === "hi" ? "hi-IN" : "en-IN", { day:"numeric", month: lang === "hi" ? "long" : "short", year:"numeric", hour:"numeric", minute:"2-digit" }).format(d);
+}
+function heatWords(t) {
+  if (t < 32) return T().heatComfort;
+  if (t < 38) return T().heatWarm;
+  if (t < 42) return T().heatHot;
+  return T().heatVery;
+}
+function heatTone(t) { return t >= 42 ? "hot" : t >= 38 ? "warm" : ""; }
+function aqiWords(a) {
+  if (a <= 50) return T().aqiGood;
+  if (a <= 100) return T().aqiMod;
+  if (a <= 150) return T().aqiSens;
+  if (a <= 200) return T().aqiUn;
+  if (a <= 300) return T().aqiVun;
+  return T().aqiHaz;
+}
+function aqiTone(a) { return a <= 100 ? "" : a <= 150 ? "warm" : "bad"; }
+
+let seq = 0, last = null, loading = false;
+
+function card(label, val, note, source, tone, kind) {
+  const d = document.createElement("div");
+  d.className = "card";
+  if (tone) d.dataset.tone = tone;
+  if (kind) d.dataset.kind = kind;
+  const s = document.createElement("small"); s.textContent = label;
+  const b = document.createElement("b"); b.textContent = val;
+  const p = document.createElement("p"); p.textContent = note;
+  const src = document.createElement("span"); src.className = "src-line"; src.textContent = source;
+  d.append(s, b, p, src);
+  $("cards").appendChild(d);
+  return d;
+}
+
+function render() {
+  if (loading || !last) return;
+  const t = T();
+  $("res").hidden = false;
+  $("cards").replaceChildren();
+  $("days").replaceChildren();
+  $("alts").replaceChildren();
+  if ($("proof")) $("proof").replaceChildren();
+  if (last.fail) {
+    $("place").textContent = t.fail;
+    $("sub").textContent = last.fail;
+    draw();
+    return;
+  }
+  if (!last.place) {
+    $("place").textContent = t.noPlace;
+    $("sub").textContent = t.noPlaceSub;
+    draw();
+    return;
+  }
+  const p = last.place;
+  const where = [p.admin2, p.admin1].filter(Boolean).join(", ");
+  $("place").textContent = p.name;
+  $("sub").textContent = (where ? where + " · " : "") + t.liveSub + " " + clock(last.fetchedAt) + ".";
+  draw([p.longitude, p.latitude]);
+  if ((last.alts || []).length) {
+    const lab = document.createElement("span");
+    lab.textContent = t.also;
+    $("alts").appendChild(lab);
+    last.alts.forEach(a => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = placeLabel(a);
+      b.addEventListener("click", () => { $("q").value = a.name; check(a.name, a); });
+      $("alts").appendChild(b);
+    });
+  }
+
+  const w = last.weather;
+  let high = null, rainSum = null;
+  if (w && w.ok) {
+    const cur = num(w.data.current && w.data.current.temperature_2m);
+    const unit = (w.data.current_units && w.data.current_units.temperature_2m) || "°C";
+    if (cur == null) card(t.now, t.unavail, t.noWeather, t.srcNow, "", "now");
+    else card(t.now, cur.toFixed(1) + " " + unit, t.modelNow + " · " + modelClock(w.data.current.time), t.srcNow, heatTone(cur), "now");
+
+    const daily = w.data.daily || {};
+    const times = daily.time || [];
+    const highs = (daily.temperature_2m_max || []).map(num);
+    const lows = (daily.temperature_2m_min || []).map(num);
+    const rains = (daily.precipitation_sum || []).map(num);
+    const tUnit = (w.data.daily_units && w.data.daily_units.temperature_2m_max) || "°C";
+    const rUnit = (w.data.daily_units && w.data.daily_units.precipitation_sum) || "mm";
+    const haveHigh = highs.length && highs.every(v => v != null);
+    const haveRain = rains.length && rains.every(v => v != null);
+    if (!haveHigh) card(t.heat, t.unavail, t.heatGap, t.srcHeat, "", "heat");
+    else {
+      high = Math.max(...highs);
+      const idx = highs.indexOf(high);
+      card(t.heat, high.toFixed(1) + " " + tUnit, heatWords(high) + " · " + dayLabel(times[idx]), t.srcHeat, heatTone(high), "heat");
+    }
+    if (!haveRain) card(t.rain, t.unavail, t.rainGap, t.srcRain, "", "rain");
+    else {
+      rainSum = rains.reduce((a, b) => a + b, 0);
+      const note = rainSum < 2 ? t.dry : rainSum < 30 ? t.some : t.heavy;
+      card(t.rain, rainSum.toFixed(1) + " " + rUnit, note, t.srcRain, rainSum >= 30 ? "warm" : "", "rain");
+    }
+    if (times.length) {
+      const wrap = document.createElement("div");
+      wrap.className = "days";
+      const table = document.createElement("table");
+      const cap = document.createElement("caption"); cap.textContent = t.daysCap;
+      const head = document.createElement("thead");
+      const hr = document.createElement("tr");
+      [t.thDay, t.thHigh, t.thLow, t.thRain, ""].forEach(label => {
+        const th = document.createElement("th"); th.textContent = label; th.scope = "col"; hr.appendChild(th);
+      });
+      head.appendChild(hr);
+      const body = document.createElement("tbody");
+      const peak = haveHigh ? Math.max(...highs) : null;
+      times.forEach((iso, i) => {
+        const tr = document.createElement("tr");
+        const cells = [dayLabel(iso), fmt(highs[i], 1) + (highs[i] != null ? " " + tUnit : ""), fmt(lows[i], 1) + (lows[i] != null ? " " + tUnit : ""), fmt(rains[i], 1) + (rains[i] != null ? " " + rUnit : "")];
+        cells.forEach(text => { const td = document.createElement("td"); td.textContent = text; tr.appendChild(td); });
+        const td = document.createElement("td");
+        const track = document.createElement("div"); track.className = "track";
+        const bar = document.createElement("i");
+        const pct = peak && highs[i] != null && peak > 0 ? Math.max(8, Math.round(highs[i] / peak * 100)) : 0;
+        bar.style.width = pct + "%";
+        track.appendChild(bar); td.appendChild(track); tr.appendChild(td);
+        body.appendChild(tr);
+      });
+      table.append(cap, head, body); wrap.appendChild(table); $("days").appendChild(wrap);
+    }
+  } else {
+    card(t.now, t.unavail, (w && w.error) || t.noWeather, t.srcNow, "", "now");
+    card(t.heat, t.unavail, (w && w.error) || t.noWeather, t.srcHeat, "", "heat");
+    card(t.rain, t.unavail, (w && w.error) || t.noWeather, t.srcRain, "", "rain");
+  }
+
+  const a = last.air;
+  let aqi = null;
+  if (a && a.ok && a.data.current && num(a.data.current.us_aqi) != null) {
+    aqi = num(a.data.current.us_aqi);
+    const pm = num(a.data.current.pm2_5);
+    const pmUnit = (a.data.current_units && a.data.current_units.pm2_5) || "µg/m³";
+    const note = aqiWords(aqi) + ". " + t.aqiNote + (pm == null ? "" : " " + t.pm + " " + pm.toFixed(1) + " " + pmUnit);
+    card(t.air, String(Math.round(aqi)), note, t.srcAirCard, aqiTone(aqi), "air");
+  } else card(t.air, t.unavail, (a && a.error) || t.noAir, t.srcAirCard, "", "air");
+
+  const q = last.quake;
+  if (q && q.ok && q.data && Array.isArray(q.data.features)) {
+    const f = q.data.features;
+    if (!f.length) card(t.quake, "0", t.noQuakes, t.srcQuakeCard, "", "quake");
+    else {
+      const top = f[0].properties || {};
+      const mag = num(top.mag);
+      const when = top.time ? clock(new Date(top.time)) : "";
+      card(t.quake, String(f.length), (mag == null ? "" : "M" + mag.toFixed(1) + " · ") + (top.place || "") + (when ? " · " + when : "") + ". " + t.quakeIs, t.srcQuakeCard, "", "quake");
+    }
+  } else card(t.quake, t.unavail, (q && q.error) || t.noQuakeSvc, t.srcQuakeCard, "", "quake");
+
+  const tips = [];
+  if (high != null && high >= 38) tips.push(t.tipHeat);
+  if (rainSum != null && rainSum >= 30) tips.push(t.tipRain);
+  if (aqi != null && aqi >= 150) tips.push(t.tipAir);
+  if (!tips.length) tips.push(t.tipOk);
+  const d = document.createElement("div");
+  d.className = "card"; d.dataset.kind = "advice"; d.style.gridColumn = "1 / -1";
+  const s = document.createElement("small"); s.textContent = t.advice; d.appendChild(s);
+  tips.forEach(x => { const p = document.createElement("p"); p.textContent = "• " + x; d.appendChild(p); });
+  const share = document.createElement("button");
+  share.type = "button"; share.className = "btn"; share.style.marginTop = "12px";
+  share.textContent = t.share;
+  share.addEventListener("click", async () => {
+    const u = new URL(location.href);
+    u.searchParams.set("city", p.name);
+    u.hash = "#/home";
+    try {
+      await navigator.clipboard.writeText(u.href);
+      share.textContent = t.copied;
+    } catch (e) {
+      share.textContent = t.shareFail + " " + u.href;
+    }
+  });
+  d.appendChild(share);
+  $("cards").appendChild(d);
+  paintProof();
+}
+
+function paintProof() {
+  const box = $("proof");
+  if (!box || !last || !last.place) return;
+  const t = T();
+  const h = document.createElement("h3");
+  h.textContent = t.proofTitle;
+  const lead = document.createElement("p");
+  lead.textContent = t.proofLead;
+  const coords = document.createElement("p");
+  coords.className = "coords";
+  coords.textContent = Number(last.place.latitude).toFixed(4) + "°N   " + Number(last.place.longitude).toFixed(4) + "°E";
+  const stamps = document.createElement("div");
+  stamps.className = "stamps";
+  const table = document.createElement("table");
+  const head = document.createElement("tr");
+  [t.colSource, t.colState, t.colTime, ""].forEach(label => {
+    const th = document.createElement("th"); th.textContent = label; th.scope = "col"; head.appendChild(th);
+  });
+  table.appendChild(head);
+  const rows = [
+    ["Place", last.geo],
+    ["Weather", last.weather],
+    ["Air", last.air],
+    ["Quakes", last.quake]
+  ];
+  rows.forEach(([name, src]) => {
+    const ok = !!(src && src.ok);
+    const stamp = document.createElement("span");
+    stamp.className = "stamp" + (ok ? "" : " bad");
+    const state = !src ? t.stampFail : ok ? (src.cached ? t.stampCached : t.stampLive) : t.stampFail;
+    const ms = src && src.elapsed_ms != null ? src.elapsed_ms + " ms" : "";
+    stamp.textContent = name + " · " + state + (ms ? " · " + ms : "");
+    stamps.appendChild(stamp);
+    const tr = document.createElement("tr");
+    const td1 = document.createElement("td"); td1.textContent = name;
+    const td2 = document.createElement("td"); td2.textContent = state;
+    const td3 = document.createElement("td"); td3.textContent = ms || "—";
+    const td4 = document.createElement("td");
+    if (src && src.url) {
+      const a = document.createElement("a");
+      a.href = src.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+      a.textContent = t.openJson;
+      td4.appendChild(a);
+    }
+    tr.append(td1, td2, td3, td4);
+    table.appendChild(tr);
+  });
+  box.append(h, lead, coords, stamps, table);
+}
+
+function pickPlace(results, query) {
+  const q = query.trim().toLowerCase();
+  return results.find(r => String(r.name || "").toLowerCase() === q) || results[0];
+}
+
+let useServer = location.protocol !== "file:";
+function markStep(id, state, note) {
+  const el = $("st-" + id);
+  if (!el) return;
+  el.className = state;
+  const b = el.querySelector("b");
+  if (b) b.textContent = note || "";
+}
+function openLoad(name) {
+  $("load-name").textContent = name;
+  ["place", "weather", "air", "quake"].forEach(id => markStep(id, "wait", ""));
+  $("load").hidden = false;
+  document.body.setAttribute("aria-busy", "true");
+}
+function closeLoad() {
+  $("load").hidden = true;
+  document.body.removeAttribute("aria-busy");
+}
+function sourceURL(kind, la, lo) {
+  if (kind === "weather") return `https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto&forecast_days=3`;
+  if (kind === "air") return `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${la}&longitude=${lo}&current=us_aqi,pm2_5`;
+  const since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  return `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=${la}&longitude=${lo}&maxradiuskm=300&minmagnitude=3&starttime=${since}&orderby=magnitude&limit=20`;
+}
+async function serverGet(path) {
+  const r = await fetch(path, { signal: AbortSignal.timeout(15000) });
+  const ct = r.headers.get("content-type") || "";
+  if (!ct.includes("json")) { useServer = false; throw new Error("no-server"); }
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}
+async function directGet(url) {
+  const t0 = performance.now();
+  try {
+    const data = await get(url);
+    return { ok: true, data, url, elapsed_ms: Math.round(performance.now() - t0), cached: false };
+  } catch (e) {
+    return { ok: false, error: (e && e.message) || T().unavail, url, elapsed_ms: Math.round(performance.now() - t0), cached: false };
+  }
+}
+function finish(my, payload) {
+  if (my !== seq) return;
+  loading = false;
+  last = payload;
+  closeLoad();
+  render();
+  if (payload && payload.place) $("res").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+}
+async function check(name, chosen) {
+  const my = ++seq;
+  const pool = chosen && last && last._pool ? last._pool : null;
+  loading = true;
+  last = null;
+  openLoad(name);
+  markStep("place", "run");
+  try {
+    let place, alts, poolOut, geoMeta;
+    if (chosen && num(chosen.latitude) != null && num(chosen.longitude) != null) {
+      place = chosen;
+      poolOut = pool || [chosen];
+      alts = otherPlaces(poolOut, chosen);
+      geoMeta = { ok: true, elapsed_ms: 0, cached: true, url: "" };
+      markStep("place", "ok", T().stampCached);
+    } else {
+      let g = null;
+      if (useServer) {
+        try { g = await serverGet("/api/geo?name=" + encodeURIComponent(name)); }
+        catch (e) { if (e && e.message !== "no-server" && !String(e).includes("Failed to fetch")) throw e; useServer = false; }
+      }
+      if (my !== seq) return;
+      if (!g) {
+        const url = "https://geocoding-api.open-meteo.com/v1/search?count=5&countryCode=IN&name=" + encodeURIComponent(name);
+        const raw = await directGet(url);
+        const results = (raw.data && raw.data.results) || [];
+        if (!raw.ok || !results.length) g = { ok: false, error: "no_place", url, elapsed_ms: raw.elapsed_ms, cached: false };
+        else {
+          const picked = pickPlace(results, name);
+          g = { ok: true, url, elapsed_ms: raw.elapsed_ms, cached: false, place: picked, alternatives: otherPlaces(results, picked), pool: results };
+        }
+      }
+      if (!g.ok || !g.place) { markStep("place", "bad"); finish(my, { place: null, geo: g }); return; }
+      place = g.place;
+      alts = g.alternatives || [];
+      poolOut = g.pool || [place].concat(alts);
+      geoMeta = g;
+      markStep("place", "ok", (g.cached ? T().stampCached : T().stampLive) + (g.elapsed_ms != null ? " " + g.elapsed_ms + " ms" : ""));
+    }
+    if (my !== seq) return;
+    if (num(place.latitude) == null || num(place.longitude) == null) { markStep("place", "bad"); finish(my, { place: null, geo: geoMeta }); return; }
+    const la = place.latitude, lo = place.longitude;
+    ["weather", "air", "quake"].forEach(id => markStep(id, "run"));
+    const jobs = [
+      ["weather", useServer ? "/api/weather?lat=" + la + "&lon=" + lo : sourceURL("weather", la, lo)],
+      ["air", useServer ? "/api/air?lat=" + la + "&lon=" + lo : sourceURL("air", la, lo)],
+      ["quake", useServer ? "/api/quakes?lat=" + la + "&lon=" + lo : sourceURL("quake", la, lo)]
+    ];
+    const settled = await Promise.all(jobs.map(async ([id, target]) => {
+      let row;
+      try { row = useServer ? await serverGet(target) : await directGet(target); }
+      catch (e) { row = { ok: false, error: (e && e.message) || T().unavail, url: useServer ? "" : target, elapsed_ms: null, cached: false }; }
+      if (my === seq) markStep(id, row.ok ? "ok" : "bad", row.ok ? ((row.cached ? T().stampCached : T().stampLive) + (row.elapsed_ms != null ? " " + row.elapsed_ms + " ms" : "")) : T().stampFail);
+      return row;
+    }));
+    finish(my, { place, fetchedAt: new Date(), _pool: poolOut, alts, geo: geoMeta, weather: settled[0], air: settled[1], quake: settled[2] });
+  } catch (e) {
+    if (my !== seq) return;
+    markStep("place", "bad");
+    finish(my, { fail: (e && e.message) || T().failSub });
+  }
+}
+
+$("f").addEventListener("submit", e => { e.preventDefault(); const v = $("q").value.trim(); if (v) check(v); });
+document.querySelectorAll("[data-c]").forEach(b => b.addEventListener("click", () => { $("q").value = b.dataset.c; check(b.dataset.c); }));
+$("lang").addEventListener("click", () => { lang = lang === "hi" ? "en" : "hi"; applyLang(); if (!loading) render(); });
+$("theme").addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem("bhunetra-theme", next); } catch (e) {}
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", next === "dark" ? "#0E0E0E" : "#F4F0E6");
+  applyLang();
+});
+
+/* Small black dot. The trail is sampled toward the pointer so the snake eases, then fades. */
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+const trail = $("trail"), tctx = trail.getContext("2d");
+const LIFE = 520;
+const snake = [];
+let hot = false, onPage = false, hasAim = false, hasHead = false;
+let aimX = 0, aimY = 0, hx = 0, hy = 0;
+function fitTrail() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  trail.width = Math.floor(innerWidth * dpr);
+  trail.height = Math.floor(innerHeight * dpr);
+  trail.style.width = innerWidth + "px";
+  trail.style.height = innerHeight + "px";
+  tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function drawTrail(now) {
+  if (hasAim) {
+    if (!hasHead) { hx = aimX; hy = aimY; hasHead = true; }
+    else { hx += (aimX - hx) * 0.35; hy += (aimY - hy) * 0.35; }
+    const prev = snake[snake.length - 1];
+    if (!prev || Math.hypot(hx - prev.x, hy - prev.y) > 1.4) snake.push({ x: hx, y: hy, t: now });
+    else { prev.x = hx; prev.y = hy; }
+    if (snake.length > 36) snake.shift();
+  }
+  if (onPage && snake.length) snake[snake.length - 1].t = now;
+  tctx.clearRect(0, 0, innerWidth, innerHeight);
+  const keep = onPage ? 1 : 0;
+  for (let i = snake.length - 1 - keep; i >= 0; i--) if (now - snake[i].t > LIFE) snake.splice(i, 1);
+  const n = snake.length;
+  if (!n) return;
+  tctx.lineCap = "round";
+  tctx.lineJoin = "round";
+  for (let i = 1; i < n; i++) {
+    const k = i / (n - 1);
+    const age = 1 - Math.min(1, (now - snake[i].t) / LIFE);
+    const alpha = Math.max(0, k * age);
+    const a = snake[i - 1], b = snake[i];
+    const cx = a.x + (b.x - a.x) * 0.5, cy = a.y + (b.y - a.y) * 0.5;
+    tctx.strokeStyle = "rgba(255,229,0," + (alpha * 0.45) + ")";
+    tctx.lineWidth = 1.2 + k * 3.2;
+    tctx.beginPath(); tctx.moveTo(a.x, a.y); tctx.quadraticCurveTo(a.x, a.y, cx, cy); tctx.stroke();
+    tctx.strokeStyle = "rgba(17,17,17," + alpha + ")";
+    tctx.lineWidth = 0.6 + k * 2.1;
+    tctx.beginPath(); tctx.moveTo(a.x, a.y); tctx.quadraticCurveTo(a.x, a.y, cx, cy); tctx.stroke();
+  }
+  const r = hot ? 4 : 3;
+  tctx.fillStyle = "#FFE500";
+  tctx.beginPath(); tctx.arc(hx, hy, r + 1.15, 0, Math.PI * 2); tctx.fill();
+  tctx.fillStyle = "#111";
+  tctx.beginPath(); tctx.arc(hx, hy, r, 0, Math.PI * 2); tctx.fill();
+}
+if (fine && !reduced) {
+  fitTrail();
+  addEventListener("resize", fitTrail);
+  addEventListener("pointermove", e => {
+    if (e.pointerType && e.pointerType !== "mouse") return;
+    onPage = true;
+    document.documentElement.classList.add("cursor-on");
+    hot = !!(e.target && e.target.closest && e.target.closest("a, button, summary, .card, .src a, [data-c]"));
+    aimX = e.clientX; aimY = e.clientY; hasAim = true;
+  }, { passive: true });
+  addEventListener("pointerout", e => { if (!e.relatedTarget) { onPage = false; hasAim = false; hasHead = false; snake.length = 0; } });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { onPage = false; snake.length = 0; } });
+  const loop = now => { drawTrail(now || performance.now()); requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+} else trail.remove();
+
+function hideBoot() {
+  setTimeout(() => {
+    const b = $("boot");
+    if (b) { b.classList.add("off"); setTimeout(() => b.remove(), 400); }
+  }, 500);
+}
+document.readyState === "complete" ? hideBoot() : addEventListener("load", hideBoot);
+setTimeout(hideBoot, 4000);
+
+get("https://api.open-meteo.com/v1/forecast?current=temperature_2m&latitude=" + CITIES.map(c => c[2]).join(",") + "&longitude=" + CITIES.map(c => c[1]).join(","))
+  .then(d => {
+    const arr = Array.isArray(d) ? d : [d];
+    if (arr.length !== CITIES.length) return;
+    arr.forEach((x, i) => {
+      const v = num(x && x.current && x.current.temperature_2m);
+      if (v != null) TEMPS[CITIES[i][0]] = Math.round(v);
+    });
+  }).catch(() => {});
+
+addEventListener("hashchange", route);
+route();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitGhost);
+fitMap();
+addEventListener("resize", fitMap);
+const qc = new URLSearchParams(location.search).get("city");
+if (qc) {
+  if (location.hash.slice(2) !== "home") location.hash = "#/home";
+  $("q").value = qc;
+  check(qc);
+}
+</script>
+</body>
+</html>
