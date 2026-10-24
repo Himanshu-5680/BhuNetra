@@ -1,4 +1,5 @@
-// Cloudflare Pages Function: the same four public sources serve.py proxies.
+// Cloudflare Worker: serves public/ as static assets and answers /api/*
+// from the same four public sources serve.py proxies.
 // A missing value is an error, never a zero filled in here.
 
 const TTL = 600;
@@ -178,12 +179,13 @@ function point(params) {
 
 const badPoint = () => json({ ok: false, error: "coordinates are missing or outside the India box" }, 400);
 
-export async function onRequestGet({ request, params, waitUntil }) {
+async function api(request, url, waitUntil) {
+  if (request.method !== "GET") return json({ ok: false, error: "method not allowed" }, 405);
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
   if (!allow(ip)) return json({ ok: false, error: "too many requests" }, 429);
 
-  const route = [].concat(params.path || []).join("/");
-  const query = new URL(request.url).searchParams;
+  const route = url.pathname.slice("/api/".length).replace(/\/+$/, "");
+  const query = url.searchParams;
 
   if (route === "geo") return geo(query, waitUntil);
 
@@ -201,3 +203,14 @@ export async function onRequestGet({ request, params, waitUntil }) {
   if (!pair) return badPoint();
   return json(await readSource(sources[route](pair[0], pair[1]), waitUntil));
 }
+
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    if (url.pathname.startsWith("/api/")) return api(request, url, (p) => ctx.waitUntil(p));
+    if (url.pathname === "/favicon.ico") {
+      return env.ASSETS.fetch(new Request(new URL("/favicon.png", url), request));
+    }
+    return env.ASSETS.fetch(request);
+  },
+};

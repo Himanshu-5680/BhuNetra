@@ -200,11 +200,11 @@ Then open **[http://127.0.0.1:8765/](http://127.0.0.1:8765/)** in your browser.
 2. **Transparent 10-Minute Memory Cache:** Keeps a successful response in memory for `10 minutes`[cite: 3]. If you search the same city again within that window, the badge honestly stamps `cached` rather than pretending the network was instant.
 3. **Serverless Fallback:** If you open `public/index.html` directly in your browser without running `serve.py`, the client-side code queries those exact same four public endpoints directly from your browser tab.
 
-### Deploy on Cloudflare Pages
+### Deploy on Cloudflare Workers
 
-The live site runs on **Cloudflare Pages**. `public/` is served as static files, and `functions/api/[[path]].js` is a Pages Function that answers `/api/geo`, `/api/weather`, `/api/air`, and `/api/quakes` with the same sources, checks, and 10-minute cache as `serve.py`. `wrangler.toml` points Pages at `./public`.
+The live site runs as a **Cloudflare Worker** with static assets. `public/` is served as static files, and `worker/index.js` answers `/api/geo`, `/api/weather`, `/api/air`, and `/api/quakes` with the same sources, checks, and 10-minute cache as `serve.py`. `wrangler.toml` wires the two together.
 
-In the Cloudflare dashboard: **Workers & Pages → Create → Pages → Connect to Git**, pick this repo, leave the build command empty, and set the build output directory to `public`.
+In the Cloudflare dashboard: **Workers & Pages → Create → Import a repository**, pick this repo, leave the build command empty, and keep the deploy command `npx wrangler deploy`.
 
 ---
 
@@ -263,7 +263,7 @@ The public page carries the exact same facts in **Hindi** and **English** — sw
 ## 🧱 Five Non-Negotiable Principles
 
 1. **Real public data, or an honest empty card.** Never fill a failed API call with `0`[cite: 1, 3, 4].
-2. **No guessed endpoints.** `public/index.html`, the Pages Function, and `serve.py` all call only documented, inspectable URLs[cite: 3].
+2. **No guessed endpoints.** `public/index.html`, the Worker, and `serve.py` all call only documented, inspectable URLs[cite: 3].
 3. **No single accuracy badge.** A model that misses most heat-spell onset days (`11–25%` recall) does not get to wear a misleading `95% accurate` badge[cite: 4, 6].
 4. **Zero friction.** No account, no API key, and no sign-up for the core page[cite: 1, 4].
 5. **Safety first.** Official government and disaster-management instructions always outrank this screen[cite: 2].
