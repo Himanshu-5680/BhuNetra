@@ -19,9 +19,9 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
-PAGE = ROOT / "bhunetra.html"
-HOST = os.environ.get("HOST", "0.0.0.0" if os.environ.get("RENDER") else "127.0.0.1")
+ROOT = Path(__file__).resolve().parent / "public"
+PAGE = ROOT / "index.html"
+HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8765"))
 TTL = 600
 UA = "BhuNetra/0.1 (open research page; https://github.com/Himanshu-5680/BhuNetra)"
@@ -177,10 +177,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(raw)
 
     def client_ip(self) -> str:
-        # Behind Render's proxy every request arrives from the proxy address.
-        forwarded = self.headers.get("X-Forwarded-For", "")
-        first = forwarded.split(",")[0].strip()
-        return first or self.client_address[0]
+        return self.client_address[0]
 
     def query(self) -> dict[str, str]:
         parsed = urllib.parse.urlparse(self.path)
@@ -189,7 +186,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         path = urllib.parse.urlparse(self.path).path
-        if path in ("/", "/bhunetra.html"):
+        if path in ("/", "/index.html", "/bhunetra.html"):
             self.send_file(PAGE, "text/html; charset=utf-8")
             return
         if path == "/favicon.svg":
