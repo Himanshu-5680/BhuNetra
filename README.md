@@ -6,7 +6,7 @@
 
 
 
-![BhuNetra. Earth's eye on India's hazards. Real public data. Plain words.](docs/readme-banner.svg)
+![BhuNetra. Earth's eye on India's hazards. Real public data. Plain words.](docs/readme-banner.png)
 
   
 

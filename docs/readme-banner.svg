@@ -2,7 +2,7 @@
   <rect x="18" y="18" width="1164" height="420" fill="#111111"/>
   <rect x="8" y="8" width="1164" height="420" fill="#d6e9fe" stroke="#111111" stroke-width="6"/>
   <rect x="8" y="8" width="1164" height="54" fill="#facc00" stroke="#111111" stroke-width="6"/>
-  <text x="600" y="43" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="22" fill="#111111" letter-spacing="1.5">INFORMATION ONLY · NOT AN IMD, CPCB OR NDMA WARNING</text>
+  <text x="600" y="43" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="22" fill="#111111" letter-spacing="1.5">INFORMATION ONLY Â· NOT AN IMD, CPCB OR NDMA WARNING</text>
 
   <g transform="translate(78,118)">
     <path d="M4 48C28 10 132 10 156 48C132 86 28 86 4 48Z" fill="none" stroke="#5294ff" stroke-width="7"/>
